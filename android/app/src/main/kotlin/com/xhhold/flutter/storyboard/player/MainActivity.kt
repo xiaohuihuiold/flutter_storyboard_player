@@ -1,4 +1,4 @@
-package com.xhhold.flutter.storyboard.flutter_storyboard_player
+package com.xhhold.flutter.storyboard.player
 
 import android.os.Bundle
 

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.xhhold.flutter.storyboard.flutter_storyboard_player">
+    package="com.xhhold.flutter.storyboard.player">
     <!-- Flutter needs it to communicate with the running application
          to allow setting breakpoints, to provide hot reload, etc.
     -->
