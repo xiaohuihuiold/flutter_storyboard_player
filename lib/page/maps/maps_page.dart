@@ -64,7 +64,8 @@ class _MapsPageState extends State<MapsPage> {
                     return GestureDetector(
                       onTap: () {
                         _controller.animateTo(
-                          (index - 3) * 60.0,
+                          (index - 3) * 60.0 +
+                              MediaQuery.of(context).size.height / 2,
                           duration: Duration(milliseconds: 300),
                           curve: Curves.fastOutSlowIn,
                         );
@@ -115,7 +116,15 @@ class _MapsPageState extends State<MapsPage> {
                       ),
                     );
                   },
-                ),
+                )
+                  ..add(Container(
+                    height: MediaQuery.of(context).size.height / 2,
+                  ))
+                  ..insert(
+                      0,
+                      Container(
+                        height: MediaQuery.of(context).size.height / 2,
+                      )),
               ),
             ),
           ),
