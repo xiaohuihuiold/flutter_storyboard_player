@@ -10,6 +10,11 @@ class OSUMapInfo {
 
   /// 难度信息
   OSUMapDifficulty difficulty;
+
+  @override
+  String toString() {
+    return '$general\n$editor\n$metadata\n$difficulty';
+  }
 }
 
 /// 样本集
@@ -84,6 +89,93 @@ class OSUMapGeneral {
 
   /// 使用变速模块时是否改变声音样本速率
   bool samplesMatchPlaybackRate;
+
+  OSUMapGeneral();
+
+  factory OSUMapGeneral.fromMap(Map<String, String> map) {
+    if (map == null) {
+      return null;
+    }
+    OSUMapGeneral general = OSUMapGeneral();
+    general.audioFilename = map['AudioFilename'];
+    general.audioLeadIn = int.tryParse(map['AudioLeadIn'] ?? '0') ?? 0;
+    general.previewTime = int.tryParse(map['PreviewTime'] ?? '-1') ?? -1;
+    general.countDown = int.tryParse(map['Countdown'] ?? '1') ?? 1;
+    general.sampleSet = () {
+      switch (map['SampleSet']) {
+        case 'Normal':
+          return SampleSet.Normal;
+        case 'Soft':
+          return SampleSet.Soft;
+        case 'Drum':
+          return SampleSet.Drum;
+      }
+      return SampleSet.Normal;
+    }();
+    general.stackLeniency =
+        double.tryParse(map['StackLeniency'] ?? '0.7') ?? 0.7;
+    general.mode = () {
+      switch (map['Mode']) {
+        case '0':
+          return GameMode.OSU;
+        case '1':
+          return GameMode.TAIKO;
+        case '2':
+          return GameMode.CATCH;
+        case '3':
+          return GameMode.MANIA;
+      }
+      return GameMode.OSU;
+    }();
+    general.letterboxInBreaks = (map['LetterboxInBreaks'] ?? '0') == '1';
+    general.storyFireInFront = (map['StoryFireInFront'] ?? '1') == '1';
+    general.useSkinSprites = (map['UseSkinSprites'] ?? '0') == '1';
+    general.alwaysShowPlayField = (map['AlwaysShowPlayfield'] ?? '0') == '1';
+    general.overlayPosition = () {
+      switch (map['OverlayPosition']) {
+        case 'NoChange ':
+          return OverlayPosition.NoChange;
+        case 'Below ':
+          return OverlayPosition.Below;
+        case 'Above ':
+          return OverlayPosition.Above;
+      }
+      return OverlayPosition.NoChange;
+    }();
+    general.skinPreference = map['SkinPreference'];
+    general.epilepsyWarning = (map['EpilepsyWarning'] ?? '0') == '1';
+    general.countdownOffset = int.tryParse(map['CountdownOffset'] ?? '0') ?? 0;
+    general.specialStyle = (map['SpecialStyle'] ?? '0') == '1';
+    general.wideScreenStoryBoard = (map['WidescreenStoryboard'] ?? '0') == '1';
+    general.samplesMatchPlaybackRate =
+        (map['SamplesMatchPlaybackRate'] ?? '0') == '1';
+    return general;
+  }
+
+  @override
+  String toString() {
+    return '''======[General]======
+| AudioFilename: $audioFilename
+| AudioLeadIn: $audioLeadIn
+| PreviewTime: $previewTime
+| Countdown: $countDown
+| SampleSet: $sampleSet
+| StackLeniency: $stackLeniency
+| Mode: $mode
+| LetterboxInBreaks: $letterboxInBreaks
+| StoryFireInFront: $storyFireInFront
+| UseSkinSprites: $useSkinSprites
+| AlwaysShowPlayfield: $alwaysShowPlayField
+| OverlayPosition: $overlayPosition
+| SkinPreference: $skinPreference
+| EpilepsyWarning: $epilepsyWarning
+| CountdownOffset: $countdownOffset
+| SpecialStyle: $specialStyle
+| WidescreenStoryboard: $wideScreenStoryBoard
+| SamplesMatchPlaybackRate: $samplesMatchPlaybackRate
+==================
+''';
+  }
 }
 
 /// 编辑器保存的信息
@@ -102,6 +194,48 @@ class OSUMapEditor {
 
   /// 时间轴缩放
   double timelineZoom;
+
+  OSUMapEditor();
+
+  factory OSUMapEditor.fromMap(Map<String, String> map) {
+    if (map == null) {
+      return null;
+    }
+    OSUMapEditor editor = OSUMapEditor();
+    editor.bookmarks = () {
+      List<String> marks = map['Bookmarks']?.split(',');
+      List<int> bookmarks = List<int>.generate(marks?.length ?? 0, (index) {
+        return int.tryParse(marks[index]?.trim() ?? '-1');
+      });
+      return bookmarks;
+    }();
+    if (map['DistanceSpacing'] != null) {
+      editor.distanceSpacing = double.tryParse(map['DistanceSpacing']);
+    }
+    if (map['BeatDivisor'] != null) {
+      editor.beatDivisor = double.tryParse(map['BeatDivisor']);
+    }
+    if (map['GridSize'] != null) {
+      editor.gridSize = int.tryParse(map['GridSize']);
+    }
+    if (map['TimelineZoom'] != null) {
+      editor.timelineZoom = double.tryParse(map['TimelineZoom']);
+    }
+
+    return editor;
+  }
+
+  @override
+  String toString() {
+    return '''======[Editor]======
+| Bookmarks: $bookmarks
+| DistanceSpacing: $distanceSpacing
+| BeatDivisor: $beatDivisor
+| GridSize: $gridSize
+| TimelineZoom: $timelineZoom
+==================
+''';
+  }
 }
 
 /// 地图元数据
@@ -135,6 +269,52 @@ class OSUMapMetadata {
 
   /// 地图集id
   int beatmapSetID;
+
+  OSUMapMetadata();
+
+  factory OSUMapMetadata.fromMap(Map<String, String> map) {
+    if (map == null) {
+      return null;
+    }
+    OSUMapMetadata metadata = OSUMapMetadata();
+    metadata.title = map['Title'];
+    metadata.titleUnicode = map['TitleUnicode'];
+    metadata.artist = map['Artist'];
+    metadata.artistUnicode = map['ArtistUnicode'];
+    metadata.creator = map['Creator'];
+    metadata.version = map['Version'];
+    metadata.source = map['Source'];
+    metadata.tags = () {
+      List<String> tags = map['Tags']?.split(RegExp(r'\s+'));
+      return List<String>.generate(tags?.length ?? 0, (index) {
+        return tags[index]?.trim();
+      });
+    }();
+    if (map['BeatmapID'] != null) {
+      metadata.beatmapID = int.tryParse(map['BeatmapID']);
+    }
+    if (map['BeatmapSetID'] != null) {
+      metadata.beatmapSetID = int.tryParse(map['BeatmapSetID']);
+    }
+    return metadata;
+  }
+
+  @override
+  String toString() {
+    return '''======[Metadata]======
+| Title: $title
+| TitleUnicode: $titleUnicode
+| Artist: $artist
+| ArtistUnicode: $artistUnicode
+| Creator: $creator
+| Version: $version
+| Source: $source
+| Tags: $tags
+| BeatmapID: $beatmapID
+| BeatmapSetID: $beatmapSetID
+==================
+''';
+  }
 }
 
 /// 难度信息
@@ -154,4 +334,46 @@ class OSUMapDifficulty {
   double sliderMultiplier;
 
   double sliderTickRate;
+
+  OSUMapDifficulty();
+
+  factory OSUMapDifficulty.fromMap(Map<String, String> map) {
+    if (map == null) {
+      return null;
+    }
+    OSUMapDifficulty difficulty = OSUMapDifficulty();
+    if (map['HPDrainRate'] != null) {
+      difficulty.hpDrainRate = double.tryParse(map['HPDrainRate']);
+    }
+    if (map['CircleSize'] != null) {
+      difficulty.circleSize = double.tryParse(map['CircleSize']);
+    }
+    if (map['OverallDifficulty'] != null) {
+      difficulty.overallDifficulty = double.tryParse(map['OverallDifficulty']);
+    }
+    if (map['ApproachRate'] != null) {
+      difficulty.approachRate = double.tryParse(map['ApproachRate']);
+    }
+    if (map['SliderMultiplier'] != null) {
+      difficulty.sliderMultiplier = double.tryParse(map['SliderMultiplier']);
+    }
+    if (map['SliderTickRate'] != null) {
+      difficulty.sliderTickRate = double.tryParse(map['SliderTickRate']);
+    }
+
+    return difficulty;
+  }
+
+  @override
+  String toString() {
+    return '''======[Difficulty]======
+| HPDrainRate: $hpDrainRate
+| CircleSize: $circleSize
+| OverallDifficulty: $overallDifficulty
+| ApproachRate: $approachRate
+| SliderMultiplier: $sliderMultiplier
+| SliderTickRate: $sliderTickRate
+==================
+''';
+  }
 }
