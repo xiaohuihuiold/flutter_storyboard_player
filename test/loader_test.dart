@@ -7,8 +7,10 @@ void main() {
     'loader test',
     () async {
       String path = r'F:\app\flutter_storyboard_player\assets\test.osu';
-      OSUMapInfo mapInfo = await OSUMapLoader().loadFromPath(path);
-      print(mapInfo);
+      OSUMapLoader loader = OSUMapLoader();
+      OSUMapInfo mapInfo = await loader.loadFromPath(path);
+      mapInfo = await loader.loadOSB();
+      // print(mapInfo);
     },
     timeout: Timeout(Duration(days: 1)),
   );

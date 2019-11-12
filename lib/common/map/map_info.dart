@@ -1,3 +1,5 @@
+import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
+
 class OSUMapInfo {
   /// 一般信息
   OSUMapGeneral general;
@@ -10,6 +12,9 @@ class OSUMapInfo {
 
   /// 难度信息
   OSUMapDifficulty difficulty;
+
+  /// 故事板
+  OSBEvents events;
 
   @override
   String toString() {

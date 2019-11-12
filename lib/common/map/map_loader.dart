@@ -4,11 +4,18 @@ import 'package:flutter_storyboard_player/common/map/map_info.dart';
 
 /// osu地图加载器
 class OSUMapLoader {
+  /// 地图路径
+  String path;
+
   /// 地图信息
   OSUMapInfo mapInfo;
 
+  /// .osu文件里面的[Events]
+  List<String> _events;
+
   /// 从路径加载
   Future<OSUMapInfo> loadFromPath(String path) async {
+    this.path = path;
     File file = File(path);
     if (!(await file.exists())) {
       print('没有找到文件: $path');
@@ -40,6 +47,35 @@ class OSUMapLoader {
     return mapInfo;
   }
 
+  Future<OSUMapInfo> loadOSB() async {
+    if (mapInfo == null) {
+      print('未加载地图文件');
+      return null;
+    }
+    File file = File(path);
+    if (!(await file.exists())) {
+      print('没有找到文件: $path');
+      return null;
+    }
+    Directory directory = file.parent;
+    FileSystemEntity entity = directory
+        .listSync()
+        .firstWhere((e) => e.path.endsWith('.osb'), orElse: () {});
+    if (entity == null) {
+      print('没有找到osb文件');
+      return mapInfo;
+    }
+    String osbPath = entity.path;
+    File osbFile = File(osbPath);
+    List<String> lines = osbFile.readAsLinesSync();
+    lines?.remove('[Events]');
+    if (_events != null) {
+      lines.insertAll(0, _events);
+    }
+    _OSUStoryBoardLoader(mapInfo).parse();
+    return mapInfo;
+  }
+
   /// 解包数据
   void unpackData(String struct, List<String> strings) {
     if (mapInfo == null || struct == null || strings == null) {
@@ -67,6 +103,7 @@ class OSUMapLoader {
         map?.clear();
         break;
       case '[Events]':
+        _events = List<String>.from(strings);
         break;
       case '[TimingPoints]':
         break;
@@ -98,5 +135,18 @@ class OSUMapLoader {
       }
     });
     return map;
+  }
+}
+
+/// StoryBoard加载器
+class _OSUStoryBoardLoader {
+  /// 地图信息
+  OSUMapInfo mapInfo;
+
+  _OSUStoryBoardLoader(this.mapInfo);
+
+  /// 开始解析
+  void parse() {
+
   }
 }
