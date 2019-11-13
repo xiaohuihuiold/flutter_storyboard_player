@@ -1,5 +1,6 @@
 import 'package:flutter_storyboard_player/common/map/map_info.dart';
 import 'package:flutter_storyboard_player/common/map/map_loader.dart';
+import 'package:flutter_storyboard_player/common/map/storyboard_event.dart';
 import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -36,6 +37,18 @@ void main() {
 void printSprite(Sprite sprite) {
   print('$sprite');
   sprite?.events?.forEach((e) {
-    print(' $e:(${e.easing},${e.startTime},${e.endTime})');
+    if (e is TriggerEvent) {
+      print(' $e:(${e.startTime},${e.endTime})');
+      e.events?.forEach((el) {
+        print('  $el:(${el.easing},${el.startTime},${el.endTime})');
+      });
+    } else if (e is LoopEvent) {
+      print(' $e:(${e.startTime})');
+      e.events?.forEach((el) {
+        print('  $el:(${el.easing},${el.startTime},${el.endTime})');
+      });
+    } else {
+      print(' $e:(${e.easing},${e.startTime},${e.endTime})');
+    }
   });
 }

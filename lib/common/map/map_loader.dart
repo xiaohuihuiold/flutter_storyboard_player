@@ -320,7 +320,7 @@ class _OSUStoryBoardLoader {
     sprite.fileName = fileName;
     sprite.position = position;
 
-    i = _parseEvents(i + 1, sprite);
+    i = _parseEvents(i + 1, sprite: sprite);
 
     sprites.add(sprite);
     //
@@ -328,9 +328,15 @@ class _OSUStoryBoardLoader {
   }
 
   /// 解析事件
-  int _parseEvents(int i, Sprite sprite) {
+  int _parseEvents(int i,
+      {Sprite sprite, LoopEvent loopEvent, TriggerEvent triggerEvent}) {
     for (; i < lines.length;) {
       String line = lines[i];
+      if ((loopEvent != null || triggerEvent != null) &&
+          !line.startsWith('  ') &&
+          !line.startsWith('__')) {
+        return i;
+      }
       if (line.startsWith('//') ||
           line.startsWith('Sprite') ||
           line.startsWith('Animation')) {
@@ -341,7 +347,13 @@ class _OSUStoryBoardLoader {
         i++;
         continue;
       }
-      i = _parseEventType(i + 1, eventStrs, sprite: sprite);
+      i = _parseEventType(
+        i + 1,
+        eventStrs,
+        sprite: sprite,
+        loopEvent: loopEvent,
+        triggerEvent: triggerEvent,
+      );
     }
     return i;
   }
@@ -349,15 +361,21 @@ class _OSUStoryBoardLoader {
   /// 根据类型解析事件
   int _parseEventType(int i, List<String> event,
       {Sprite sprite, LoopEvent loopEvent, TriggerEvent triggerEvent}) {
-    if ((event?.length ?? 0) < 4) {
-      return i;
-    }
     SpriteEvent spriteEvent;
     String type = event[0].replaceAll('_', '').replaceAll(' ', '');
+    if (type != 'L' && type != 'T') {
+      if ((event?.length ?? 0) < 4) {
+        return i;
+      }
+    } else {
+      if ((event?.length ?? 0) < 3) {
+        return i;
+      }
+    }
     int easing;
     int startTime;
     int endTime;
-    if (type != 'L' || type != 'T') {
+    if (type != 'L' && type != 'T') {
       easing = int.tryParse(event[1].trim());
       startTime = int.tryParse(event[2].trim());
       if (event[3].trim() == '') {
@@ -468,18 +486,35 @@ class _OSUStoryBoardLoader {
         }
         break;
       case 'L':
-        // TODO: 未实现
-        return i;
+        LoopEvent loopEvent = LoopEvent();
+        spriteEvent = loopEvent;
+        loopEvent.startTime = int.tryParse(event[1]);
+        loopEvent.loopCount = int.tryParse(event[2]);
+        i = _parseEvents(i, loopEvent: loopEvent);
         break;
       case 'T':
-        // TODO: 未实现
-        return i;
+        TriggerEvent triggerEvent = TriggerEvent();
+        spriteEvent = triggerEvent;
+        triggerEvent.startTime = int.tryParse(event[2]);
+        triggerEvent.endTime = int.tryParse(event[3]);
+        triggerEvent.triggerType = () {
+          switch (event[1]) {
+            case 'HitSound':
+              return TriggerType.HitSound;
+            case 'Failing':
+              return TriggerType.Failing;
+            case 'Passing':
+              return TriggerType.Passing;
+          }
+          return null;
+        }();
+        i = _parseEvents(i, triggerEvent: triggerEvent);
         break;
     }
     if (spriteEvent == null) {
       return i;
     }
-    if (type != 'L' || type != 'T') {
+    if (type != 'L' && type != 'T') {
       spriteEvent.easing = easing;
       spriteEvent.startTime = startTime;
       spriteEvent.endTime = endTime;
