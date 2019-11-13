@@ -1,5 +1,6 @@
 import 'package:flutter_storyboard_player/common/map/map_info.dart';
 import 'package:flutter_storyboard_player/common/map/map_loader.dart';
+import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

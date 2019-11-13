@@ -102,4 +102,26 @@ class ParameterEvent extends SpriteEvent {
   ParameterType type;
 }
 
+/// 循环事件
+class LoopEvent extends SpriteEvent {
+  /// 循环次数
+  int loopCount;
 
+  /// 循环的事件
+  List<SpriteEvent> events;
+}
+
+enum TriggerType {
+  HitSound,
+  Passing,
+  Failing,
+}
+
+/// 触发事件
+class TriggerEvent extends SpriteEvent {
+  /// 事件类型
+  TriggerType triggerType;
+
+  /// 触发的事件
+  List<SpriteEvent> events;
+}

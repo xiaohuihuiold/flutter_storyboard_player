@@ -7,7 +7,7 @@ class OSBEvents {
   OSBBackground background;
 
   /// 休息时间
-  OSBBreakPeriods breakPeriods;
+  /// OSBBreakPeriods breakPeriods;
 
   /// 故事板图层
   List<Sprite> backgrounds = List();
@@ -25,10 +25,21 @@ class OSBBackground {
   int startTime;
 
   /// 文件
-  String file;
+  String fileName;
 
   /// 坐标偏移
   Offset offset;
+
+  @override
+  String toString() {
+    return '''======[Background]======
+| type: $type
+| startTime: $startTime
+| fileName: $fileName
+| offset: $offset
+==================
+''';
+  }
 }
 
 /// 休息时间
@@ -82,7 +93,7 @@ class Sprite {
   Offset position;
 
   /// 精灵事件列表
-  List<SpriteEvent> events = List();
+  List<SpriteEvent> events;
 }
 
 /// 动画精灵
