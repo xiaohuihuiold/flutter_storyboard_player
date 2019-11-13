@@ -15,11 +15,6 @@ class OSUMapInfo {
 
   /// 故事板
   OSBEvents events;
-
-  @override
-  String toString() {
-    return '$general\n$editor\n$metadata\n$difficulty';
-  }
 }
 
 /// 样本集

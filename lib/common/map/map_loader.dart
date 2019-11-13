@@ -26,7 +26,7 @@ class OSUMapLoader {
       return null;
     }
     // 读取数据按行
-    List<String> lines = file.readAsLinesSync();
+    List<String> lines = await file.readAsLines();
 
     // 初始化数据
     mapInfo = OSUMapInfo();
@@ -71,7 +71,7 @@ class OSUMapLoader {
     }
     String osbPath = entity.path;
     File osbFile = File(osbPath);
-    List<String> lines = osbFile.readAsLinesSync();
+    List<String> lines = await osbFile.readAsLines();
     lines?.remove('[Events]');
     if (_events != null) {
       lines.insertAll(0, _events);
@@ -192,6 +192,9 @@ class _OSUStoryBoardLoader {
   int _parseBackground(int i) {
     OSBBackground osbBackground = OSBBackground();
     String line = lines[i];
+    if (line.startsWith('//')) {
+      return i;
+    }
     i++;
     List<String> params = line.split(',');
     if (params.length != 5) {
@@ -324,6 +327,7 @@ class _OSUStoryBoardLoader {
     return i;
   }
 
+  /// 解析事件
   int _parseEvents(int i, Sprite sprite) {
     for (; i < lines.length;) {
       String line = lines[i];
@@ -337,60 +341,164 @@ class _OSUStoryBoardLoader {
         i++;
         continue;
       }
-      i = _parseEventType(i + 1, sprite, eventStrs);
+      i = _parseEventType(i + 1, eventStrs, sprite: sprite);
     }
     return i;
   }
 
-  int _parseEventType(int i, Sprite sprite, List<String> event) {
-    if (sprite == null || (event?.length ?? 0) < 1) {
+  /// 根据类型解析事件
+  int _parseEventType(int i, List<String> event,
+      {Sprite sprite, LoopEvent loopEvent, TriggerEvent triggerEvent}) {
+    if ((event?.length ?? 0) < 4) {
       return i;
     }
-    if (sprite.events == null) {
-      sprite.events = List();
-    }
+    SpriteEvent spriteEvent;
     String type = event[0].replaceAll('_', '').replaceAll(' ', '');
+    int easing;
+    int startTime;
+    int endTime;
+    if (type != 'L' || type != 'T') {
+      easing = int.tryParse(event[1].trim());
+      startTime = int.tryParse(event[2].trim());
+      if (event[3].trim() == '') {
+        endTime = startTime;
+      } else {
+        endTime = int.tryParse(event[3].trim());
+      }
+    }
     switch (type) {
       case 'F':
         FadeEvent fadeEvent = FadeEvent();
-        sprite.events.add(fadeEvent);
+        spriteEvent = fadeEvent;
+        fadeEvent.startOpacity = double.tryParse(event[4].trim());
+        if (event.length < 6) {
+          fadeEvent.endOpacity = fadeEvent.startOpacity;
+        } else {
+          fadeEvent.endOpacity = double.tryParse(event[5].trim());
+        }
         break;
       case 'M':
-        MoveEvent fadeEvent = MoveEvent();
-        sprite.events.add(fadeEvent);
+        MoveEvent moveEvent = MoveEvent();
+        spriteEvent = moveEvent;
+        Offset startOffset =
+            Offset(double.tryParse(event[4]), double.tryParse(event[5]));
+        Offset endOffset;
+        if (event.length == 6) {
+          endOffset = startOffset;
+        } else {
+          endOffset =
+              Offset(double.tryParse(event[6]), double.tryParse(event[7]));
+        }
+
+        moveEvent.startOffset = startOffset;
+        moveEvent.endOffset = endOffset;
         break;
       case 'MX':
-        MoveXEvent fadeEvent = MoveXEvent();
-        sprite.events.add(fadeEvent);
+        MoveXEvent moveXEvent = MoveXEvent();
+        spriteEvent = moveXEvent;
+        moveXEvent.startX = double.tryParse(event[4].trim());
+        if (event.length < 6) {
+          moveXEvent.endX = moveXEvent.startX;
+        } else {
+          moveXEvent.endX = double.tryParse(event[5].trim());
+        }
         break;
       case 'MY':
-        MoveYEvent fadeEvent = MoveYEvent();
-        sprite.events.add(fadeEvent);
+        MoveYEvent moveYEvent = MoveYEvent();
+        spriteEvent = moveYEvent;
+        moveYEvent.startY = double.tryParse(event[4].trim());
+        if (event.length < 6) {
+          moveYEvent.endY = moveYEvent.startY;
+        } else {
+          moveYEvent.endY = double.tryParse(event[5].trim());
+        }
         break;
       case 'S':
-        ScaleEvent fadeEvent = ScaleEvent();
-        sprite.events.add(fadeEvent);
+        ScaleEvent scaleEvent = ScaleEvent();
+        spriteEvent = scaleEvent;
+        scaleEvent.startScale = double.tryParse(event[4].trim());
+        if (event.length < 6) {
+          scaleEvent.endScale = scaleEvent.startScale;
+        } else {
+          scaleEvent.endScale = double.tryParse(event[5].trim());
+        }
         break;
       case 'V':
-        VectorScaleEvent fadeEvent = VectorScaleEvent();
-        sprite.events.add(fadeEvent);
+        VectorScaleEvent vectorScaleEvent = VectorScaleEvent();
+        spriteEvent = vectorScaleEvent;
+        vectorScaleEvent.startX = double.tryParse(event[4].trim());
+        vectorScaleEvent.startY = double.tryParse(event[5].trim());
+        if (event.length == 6) {
+          vectorScaleEvent.endX = vectorScaleEvent.startX;
+          vectorScaleEvent.endY = vectorScaleEvent.startY;
+        } else {
+          vectorScaleEvent.endX = double.tryParse(event[6].trim());
+          vectorScaleEvent.endY = double.tryParse(event[7].trim());
+        }
         break;
       case 'R':
-        RotateEvent fadeEvent = RotateEvent();
-        sprite.events.add(fadeEvent);
+        RotateEvent rotateEvent = RotateEvent();
+        spriteEvent = rotateEvent;
+        rotateEvent.startRotate = double.tryParse(event[4].trim());
+        if (event.length < 6) {
+          rotateEvent.endRotate = rotateEvent.startRotate;
+        } else {
+          rotateEvent.endRotate = double.tryParse(event[5].trim());
+        }
         break;
       case 'C':
-        ColourEvent fadeEvent = ColourEvent();
-        sprite.events.add(fadeEvent);
+        ColourEvent colourEvent = ColourEvent();
+        spriteEvent = colourEvent;
+        // TODO: 未实现
+        return i;
         break;
       case 'P':
-        ParameterEvent fadeEvent = ParameterEvent();
-        sprite.events.add(fadeEvent);
+        ParameterEvent parameterEvent = ParameterEvent();
+        spriteEvent = parameterEvent;
+        switch (event[4]) {
+          case 'H':
+            parameterEvent.type = ParameterType.H;
+            break;
+          case 'V':
+            parameterEvent.type = ParameterType.V;
+            break;
+          case 'A':
+            parameterEvent.type = ParameterType.A;
+            break;
+        }
         break;
       case 'L':
+        // TODO: 未实现
+        return i;
         break;
       case 'T':
+        // TODO: 未实现
+        return i;
         break;
+    }
+    if (spriteEvent == null) {
+      return i;
+    }
+    if (type != 'L' || type != 'T') {
+      spriteEvent.easing = easing;
+      spriteEvent.startTime = startTime;
+      spriteEvent.endTime = endTime;
+    }
+    if (sprite != null) {
+      if (sprite.events == null) {
+        sprite.events = List();
+      }
+      sprite.events.add(spriteEvent);
+    } else if (loopEvent != null) {
+      if (loopEvent.events == null) {
+        loopEvent.events = List();
+      }
+      loopEvent.events.add(spriteEvent);
+    } else if (triggerEvent != null) {
+      if (triggerEvent.events == null) {
+        triggerEvent.events = List();
+      }
+      triggerEvent.events.add(spriteEvent);
     }
     return i;
   }

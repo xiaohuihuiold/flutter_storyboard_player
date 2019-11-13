@@ -32,13 +32,7 @@ class OSBBackground {
 
   @override
   String toString() {
-    return '''======[Background]======
-| type: $type
-| startTime: $startTime
-| fileName: $fileName
-| offset: $offset
-==================
-''';
+    return 'Background($type,$startTime,$fileName, $offset)';
   }
 }
 
@@ -49,6 +43,11 @@ class OSBBreakPeriods {
 
   /// 结束时间
   int endTime;
+
+  @override
+  String toString() {
+    return 'BreakPeriods($startTime,$endTime)';
+  }
 }
 
 /// 图层
@@ -94,6 +93,11 @@ class Sprite {
 
   /// 精灵事件列表
   List<SpriteEvent> events;
+
+  @override
+  String toString() {
+    return 'Sprite($layer,$origin,$fileName,$position)';
+  }
 }
 
 /// 动画精灵
@@ -106,4 +110,9 @@ class AnimationSprite extends Sprite {
 
   /// 动画循环方式
   SpriteLoopType loopType;
+
+  @override
+  String toString() {
+    return 'Animation($layer,$origin,$fileName,$position,$frameCount,$frameDelay,$loopType)';
+  }
 }
