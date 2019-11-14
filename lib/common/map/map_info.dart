@@ -1,6 +1,9 @@
 import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
 
 class OSUMapInfo {
+  /// 地图目录
+  String path;
+
   /// 一般信息
   OSUMapGeneral general;
 

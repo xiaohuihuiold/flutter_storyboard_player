@@ -30,6 +30,7 @@ class OSUMapLoader {
 
     // 初始化数据
     mapInfo = OSUMapInfo();
+    mapInfo.path = file.parent.path;
     String struct;
     List<String> strings;
 

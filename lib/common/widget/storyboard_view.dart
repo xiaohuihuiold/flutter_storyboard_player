@@ -2,25 +2,101 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_storyboard_player/common/map/map_info.dart';
 
 const double OSB_WIDTH = 640.0;
 const double OSB_HEIGHT = 480.0;
 
+enum StoryBoardActionType {
+  time,
+  info,
+}
+
+typedef StoryBoardCallback = void Function(StoryBoardActionType);
+
+/// storyboard控制器
+class StoryBoardController {
+  Set<StoryBoardCallback> _callbacks;
+
+  int _time;
+
+  int get time => _time;
+
+  set time(int value) {
+    _time = time;
+    _update(StoryBoardActionType.time);
+  }
+
+  OSUMapInfo _mapInfo;
+
+  OSUMapInfo get mapInfo => _mapInfo;
+
+  set mapInfo(OSUMapInfo value) {
+    _mapInfo = value;
+    _update(StoryBoardActionType.info);
+  }
+
+  /// 添加监听
+  void addListener(StoryBoardCallback callback) {
+    if (_callbacks == null) {
+      _callbacks = Set();
+    }
+    _callbacks.add(callback);
+  }
+
+  /// 更新数据
+  void _update(StoryBoardActionType type) {
+    _callbacks?.forEach((callback) {
+      if (callback != null) {
+        callback(type);
+      }
+    });
+  }
+}
+
 /// storyboard player视图
 class StoryBoardView extends StatefulWidget {
+  final StoryBoardController controller;
+
+  StoryBoardView({
+    Key key,
+    this.controller,
+  }) : super(key: key);
+
   @override
   _StoryBoardViewState createState() => _StoryBoardViewState();
 }
 
 class _StoryBoardViewState extends State<StoryBoardView>
     with TickerProviderStateMixin {
-  /// FPS Counter
+  /// FPS计数器
   Timer _fpsTimer;
   int _fps = 0;
   int _fpsTemp = 0;
 
-  /// refresh canvas
-  Timer _refreshTimer;
+  /// 时间轴
+  int _time = 0;
+
+  /// 地图信息
+  OSUMapInfo _mapInfo;
+
+  /// 更新信息
+  void _update(StoryBoardActionType type) {
+    switch (type) {
+      case StoryBoardActionType.time:
+        if (!mounted) return;
+        setState(() {
+          _time = widget.controller?.time ?? 0;
+        });
+        break;
+      case StoryBoardActionType.info:
+        if (!mounted) return;
+        setState(() {
+          _mapInfo = widget.controller?.mapInfo;
+        });
+        break;
+    }
+  }
 
   @override
   void initState() {
@@ -29,16 +105,13 @@ class _StoryBoardViewState extends State<StoryBoardView>
       _fps = _fpsTemp;
       _fpsTemp = 0;
     });
-    _refreshTimer = Timer.periodic(Duration(milliseconds: 1), (_) {
-      setState(() {});
-    });
+    widget.controller?.addListener(_update);
   }
 
   @override
   void dispose() {
     super.dispose();
     _fpsTimer.cancel();
-    _refreshTimer.cancel();
   }
 
   @override
@@ -48,6 +121,8 @@ class _StoryBoardViewState extends State<StoryBoardView>
         CustomPaint(
           size: Size.infinite,
           painter: _StoryBoardPainter(
+            time: _time,
+            mapInfo: _mapInfo,
             callback: () {
               _fpsTemp++;
             },
@@ -76,9 +151,13 @@ class _StoryBoardPainter extends CustomPainter {
   double _scale;
   double _offsetX;
 
+  final int time;
+  final OSUMapInfo mapInfo;
   final PaintCallback callback;
 
   _StoryBoardPainter({
+    this.time = 0,
+    this.mapInfo,
     this.callback,
   });
 
