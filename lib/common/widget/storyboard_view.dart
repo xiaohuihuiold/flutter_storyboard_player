@@ -149,6 +149,9 @@ typedef PaintCallback = void Function();
 class _StoryBoardPainter extends CustomPainter {
   Paint _girdPaint = Paint();
   Paint _spritePaint = Paint();
+  Paint _borderPaint = Paint()
+    ..color = Colors.redAccent.withOpacity(0.7)
+    ..style = PaintingStyle.stroke;
 
   Canvas _canvas;
   Size _size;
@@ -258,17 +261,21 @@ class _StoryBoardPainter extends CustomPainter {
         .scale(_scale, _scale)
         .translate(_offsetX, 0);
 
+    Rect rectPos = Rect.fromLTWH(
+      position.dx,
+      position.dy,
+      image.width * scaleX * _scale,
+      image.height * scaleY * _scale,
+    );
+
     _canvas.drawImageRect(
       image,
       Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-      Rect.fromLTWH(
-        position.dx,
-        position.dy,
-        image.width * scaleX * _scale,
-        image.height * scaleY * _scale,
-      ),
+      rectPos,
       _spritePaint,
     );
+    // 绘制边框
+    _canvas.drawRect(rectPos, _borderPaint);
     _canvas.restore();
   }
 }
