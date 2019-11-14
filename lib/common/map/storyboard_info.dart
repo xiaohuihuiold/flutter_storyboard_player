@@ -88,12 +88,6 @@ class SpriteData {
   Offset offset;
 
   bool isEmpty() {
-    if (scaleX == null) {
-      if (opacity != null) {
-        scaleX = 1.0;
-        scaleY = 1.0;
-      }
-    }
     return scaleX == null ||
         scaleY == null ||
         opacity == null ||
@@ -126,18 +120,54 @@ class Sprite {
   /// 图片
   Image image;
 
-  SpriteData getData(int time) {
+  /// 偏移
+  Offset _offset;
+
+  SpriteData getSpriteData(int time) {
     if (image == null || events == null) {
       return null;
     }
     SpriteData spriteData = SpriteData();
     for (int i = 0; i < events.length; i++) {
       SpriteEvent event = events[i];
-      if (event == null) {
-        continue;
-      }
-      // 开始时间等于结束时间
-      if (event.startTime == event.endTime && time > event.startTime) {
+      _calEvent(time, spriteData, event);
+    }
+    if (spriteData.opacity == null) {
+      return null;
+    }
+    if (spriteData.scaleX == null) {
+      spriteData.scaleX = 1.0;
+      spriteData.scaleY = 1.0;
+    }
+    if (spriteData.position == null) {
+      spriteData.position = position;
+    }
+    if (spriteData.angle == null) {
+      spriteData.angle = 0;
+    }
+    spriteData.offset = _getOffset();
+    _offset = spriteData.offset;
+    if (spriteData.offset == null) {
+      return null;
+    }
+    spriteData.offset = spriteData.offset.scale(
+      spriteData.scaleX,
+      spriteData.scaleY,
+    );
+    return spriteData;
+  }
+
+  /// 计算事件
+  void _calEvent(int time, SpriteData spriteData, SpriteEvent event) {
+    if (event == null ||
+        event is ParameterEvent ||
+        event is LoopEvent ||
+        event is TriggerEvent) {
+      return;
+    }
+    // 开始时间等于结束时间
+    if (event.startTime == event.endTime) {
+      if (time > event.startTime) {
         if (event is FadeEvent) {
           spriteData.opacity = event.endOpacity;
         } else if (event is MoveEvent) {
@@ -155,91 +185,111 @@ class Sprite {
         } else if (event is RotateEvent) {
           spriteData.angle = event.endRotate;
         }
-        continue;
+        return;
+      } else {
+        return;
       }
-      // 不在范围
-      if ((time < event.startTime || time > event.endTime)) {
-        continue;
-      }
-      // 在范围内
-      double timeLong = (event.endTime - event.startTime).toDouble();
-      double timeCurrent = (time - event.startTime).toDouble();
-      double progress = timeCurrent / timeLong;
+    }
+    // 小于开始时间
+    if (time < event.startTime) {
+      return;
+    }
+    // 大于结束时间
+    if (time > event.endTime) {
       if (event is FadeEvent) {
-        double opacity = (event.endOpacity - event.startOpacity) * progress +
-            event.startOpacity;
-        spriteData.opacity = opacity;
+        spriteData.opacity = event.endOpacity;
       } else if (event is MoveEvent) {
-        Offset position = (event.endOffset - event.startOffset) * progress +
-            event.startOffset;
-        spriteData.position = position;
+        spriteData.position = event.endOffset;
       } else if (event is MoveXEvent) {
-        double x = (event.endX - event.startX) * progress + event.startX;
-        spriteData.position = Offset(x, position.dy);
+        spriteData.position = Offset(event.endX, position.dy);
       } else if (event is MoveYEvent) {
-        double y = (event.endY - event.startY) * progress + event.startY;
-        spriteData.position = Offset(y, event.endY);
+        spriteData.position = Offset(position.dx, event.endY);
       } else if (event is ScaleEvent) {
-        double scale =
-            (event.endScale - event.startScale) * progress + event.startScale;
-        spriteData.scaleX = scale;
-        spriteData.scaleY = scale;
+        spriteData.scaleX = event.endScale;
+        spriteData.scaleY = event.endScale;
       } else if (event is VectorScaleEvent) {
-        double scaleX = (event.endX - event.startX) * progress + event.startX;
-        double scaleY = (event.endY - event.startY) * progress + event.startY;
-        spriteData.scaleX = scaleX;
-        spriteData.scaleY = scaleY;
+        spriteData.scaleX = event.endX;
+        spriteData.scaleY = event.endY;
       } else if (event is RotateEvent) {
-        double angle = (event.endRotate - event.startRotate) * progress +
-            event.startRotate;
-        spriteData.angle = angle;
+        spriteData.angle = event.endRotate;
       }
+      return;
     }
-    if (spriteData.opacity == null) {
-      FadeEvent fadeEvent = events.firstWhere((event) {
-        return (event is FadeEvent && time > event.endTime);
-      }, orElse: () {});
-      if (fadeEvent != null) {
-        spriteData.opacity = fadeEvent.endOpacity;
-      }
+    // 在事件时间范围内
+    // 计算在事件内的位置
+    double timeLong = (event.endTime - event.startTime).toDouble();
+    double timeCurrent = (time - event.startTime).toDouble();
+    double progress = timeCurrent / timeLong;
+
+    // 根据事件类型进行计算
+    if (event is FadeEvent) {
+      // 透明度
+      double diff = event.endOpacity - event.startOpacity;
+      double opacity = diff * progress + event.startOpacity;
+      spriteData.opacity = opacity;
+    } else if (event is MoveEvent) {
+      // 移动
+      Offset diff = event.endOffset - event.startOffset;
+      Offset position = diff * progress + event.startOffset;
+      spriteData.position = position;
+    } else if (event is MoveXEvent) {
+      // X移动
+      double diff = event.endX - event.startX;
+      double x = diff * progress + event.startX;
+      spriteData.position = Offset(x, position.dy);
+    } else if (event is MoveYEvent) {
+      // Y移动
+      double diff = event.endY - event.startY;
+      double y = diff * progress + event.startY;
+      spriteData.position = Offset(position.dx, y);
+    } else if (event is ScaleEvent) {
+      // 缩放
+      double diff = event.endScale - event.startScale;
+      double scale = diff * progress + event.startScale;
+      spriteData.scaleX = scale;
+      spriteData.scaleY = scale;
+    } else if (event is VectorScaleEvent) {
+      // 宽高单独缩放
+      double diffX = event.endX - event.startX;
+      double diffY = event.endY - event.startY;
+      double scaleX = diffX * progress + event.startX;
+      double scaleY = diffY * progress + event.startY;
+      spriteData.scaleX = scaleX;
+      spriteData.scaleY = scaleY;
+    } else if (event is RotateEvent) {
+      // 旋转
+      double diff = event.endRotate - event.startRotate;
+      double angle = diff * progress + event.startRotate;
+      spriteData.angle = angle;
     }
-    if (spriteData.isEmpty()) {
-      return null;
+  }
+
+  /// 获取偏移值
+  Offset _getOffset() {
+    if (_offset != null) {
+      return _offset;
     }
-    if (spriteData.angle == null) {
-      spriteData.angle = 0;
+    switch (origin) {
+      case SpriteOrigin.TopLeft:
+        return Offset(0, 0);
+      case SpriteOrigin.Centre:
+        return Offset(image.width / 2.0, image.height / 2.0);
+      case SpriteOrigin.CentreLeft:
+        return Offset(0, image.height / 2.0);
+      case SpriteOrigin.TopRight:
+        return Offset(image.width.toDouble(), 0.0);
+      case SpriteOrigin.BottomCentre:
+        return Offset(image.width / 2.0, image.height.toDouble());
+      case SpriteOrigin.TopCentre:
+        return Offset(image.width / 2.0, 0);
+      case SpriteOrigin.CentreRight:
+        return Offset(image.width.toDouble(), image.height / 2.0);
+      case SpriteOrigin.BottomLeft:
+        return Offset(0, image.height.toDouble());
+      case SpriteOrigin.BottomRight:
+        return Offset(image.width.toDouble(), image.height.toDouble());
     }
-    spriteData.offset = () {
-      switch (origin) {
-        case SpriteOrigin.TopLeft:
-          return Offset(0, 0);
-        case SpriteOrigin.Centre:
-          return Offset(image.width / 2.0, image.height / 2.0);
-        case SpriteOrigin.CentreLeft:
-          return Offset(0, image.height / 2.0);
-        case SpriteOrigin.TopRight:
-          return Offset(image.width.toDouble(), 0.0);
-        case SpriteOrigin.BottomCentre:
-          return Offset(image.width / 2.0, image.height.toDouble());
-        case SpriteOrigin.TopCentre:
-          return Offset(image.width / 2.0, 0);
-        case SpriteOrigin.CentreRight:
-          return Offset(image.width.toDouble(), image.height / 2.0);
-        case SpriteOrigin.BottomLeft:
-          return Offset(0, image.height.toDouble());
-        case SpriteOrigin.BottomRight:
-          return Offset(image.width.toDouble(), image.height.toDouble());
-      }
-      return null;
-    }();
-    if (spriteData.offset == null) {
-      return null;
-    }
-    spriteData.offset = spriteData.offset.scale(
-      spriteData.scaleX,
-      spriteData.scaleY,
-    );
-    return spriteData;
+    return null;
   }
 
   @override

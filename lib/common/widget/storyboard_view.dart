@@ -176,7 +176,7 @@ class _StoryBoardPainter extends CustomPainter {
     _offsetX = (_size.width - OSB_WIDTH * _scale) / 2.0;
 
     _clearCanvas();
-    _drawGird();
+    // _drawGird();
 
     if (mapInfo?.events != null) {
       _drawSprites(mapInfo.events.backgrounds);
@@ -190,7 +190,7 @@ class _StoryBoardPainter extends CustomPainter {
 
   void _drawSprites(List<Sprite> sprites) {
     sprites.forEach((sprite) {
-      SpriteData spriteData = sprite.getData(time);
+      SpriteData spriteData = sprite.getSpriteData(time);
       if (spriteData == null) {
         return;
       }
@@ -200,7 +200,7 @@ class _StoryBoardPainter extends CustomPainter {
 
   /// 清理画布
   void _clearCanvas() {
-    _canvas.drawColor(Colors.black, BlendMode.src);
+    _canvas.drawColor(Colors.white.withOpacity(0), BlendMode.color);
   }
 
   /// 绘制网格
@@ -245,22 +245,30 @@ class _StoryBoardPainter extends CustomPainter {
     double scaleY = spriteData.scaleY;
     double angle = spriteData.angle;
     double opacity = spriteData.opacity;
-    Offset position = spriteData.position - spriteData.offset;
+    Offset position =
+        spriteData.position.scale(_scale, _scale).translate(_offsetX, 0);
 
     _spritePaint.color = Color.fromRGBO(255, 255, 255, opacity);
+    _canvas.save();
     _canvas.translate(position.dx, position.dy);
-    _canvas.rotate(pi / 180.0 * angle);
+    _canvas.rotate(angle);
     _canvas.translate(-position.dx, -position.dy);
+
+    position = (spriteData.position - spriteData.offset)
+        .scale(_scale, _scale)
+        .translate(_offsetX, 0);
+
     _canvas.drawImageRect(
       image,
       Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
       Rect.fromLTWH(
-        _offsetX + position.dx * _scale,
-        position.dy * _scale,
+        position.dx,
+        position.dy,
         image.width * scaleX * _scale,
         image.height * scaleY * _scale,
       ),
       _spritePaint,
     );
+    _canvas.restore();
   }
 }

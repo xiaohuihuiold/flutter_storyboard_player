@@ -192,21 +192,27 @@ class _OSUStoryBoardLoader {
   /// 解析背景
   Future<int> _parseBackground(int i) async {
     OSBBackground osbBackground = OSBBackground();
-    String line = lines[i];
-    if (line.startsWith('//')) {
-      return i;
+    for (; i < lines.length; i++) {
+      String line = lines[i];
+      if (line.startsWith('//')) {
+        return i;
+      }
+      List<String> params = line.split(',');
+      if (params.length < 3 || params[0].trim() != '0') {
+        continue;
+      }
+      osbBackground.type = int.tryParse(params[0]);
+      osbBackground.startTime = int.tryParse(params[1]);
+      osbBackground.fileName =
+          params[2].replaceAll('"', '').replaceAll(r'\', '/');
+      if (params.length != 3) {
+        Offset offset = Offset(double.tryParse(params[3] ?? '0') ?? 0,
+            double.tryParse(params[4] ?? '0') ?? 0);
+        osbBackground.offset = offset;
+      }
+      i++;
+      break;
     }
-    i++;
-    List<String> params = line.split(',');
-    if (params.length != 5) {
-      return i;
-    }
-    osbBackground.type = int.tryParse(params[0]);
-    osbBackground.startTime = int.tryParse(params[1]);
-    osbBackground.fileName = params[2].replaceAll('"', '');
-    Offset offset = Offset(double.tryParse(params[3] ?? '0') ?? 0,
-        double.tryParse(params[4] ?? '0') ?? 0);
-    osbBackground.offset = offset;
     mapInfo.events.background = osbBackground;
     return i;
   }
@@ -318,7 +324,7 @@ class _OSUStoryBoardLoader {
     }
     sprite.layer = layer;
     sprite.origin = origin;
-    sprite.fileName = fileName;
+    sprite.fileName = fileName.replaceAll(r'\', '/');
     sprite.position = position;
     sprite.image = await _loadImage('${mapInfo.path}/${sprite.fileName}');
 
@@ -540,7 +546,13 @@ class _OSUStoryBoardLoader {
     return i;
   }
 
+  Map<String, Image> _imageCache = Map();
+
   Future<Image> _loadImage(String path) async {
+    Image image = _imageCache[path.trim()];
+    if (image != null) {
+      return image;
+    }
     File file = File(path);
     if (!(await file.exists())) {
       return null;
@@ -548,6 +560,8 @@ class _OSUStoryBoardLoader {
     Codec codec = await instantiateImageCodec(
         file.readAsBytesSync().buffer.asUint8List());
     FrameInfo frameInfo = await codec.getNextFrame();
-    return frameInfo.image;
+    image = frameInfo.image;
+    _imageCache[path.trim()] = image;
+    return image;
   }
 }

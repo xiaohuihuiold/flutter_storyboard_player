@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_storyboard_player/common/map/map_info.dart';
 import 'package:flutter_storyboard_player/common/map/map_loader.dart';
@@ -15,6 +17,7 @@ class MapPlayerPage extends StatefulWidget {
 
 class _MapPlayerPageState extends State<MapPlayerPage> {
   StoryBoardController _controller = StoryBoardController();
+  OSUMapInfo _mapInfo;
 
   void _onTimeUpdate(int time) {
     _controller.time = time;
@@ -22,11 +25,14 @@ class _MapPlayerPageState extends State<MapPlayerPage> {
 
   Future<Null> _onFrame(_) async {
     String path =
-        r'/sdcard/osu/372552 yuiko - Azuma no Sora kara Hajimaru Sekai/yuiko - Azuma no Sora kara Hajimaru Sekai (Short) (KaedekaShizuru) [Easy].osu';
+        r"/sdcard/osu/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Rocket's Easy].osu";
     OSUMapLoader loader = OSUMapLoader();
     OSUMapInfo mapInfo = await loader.loadFromPath(path);
     mapInfo = await loader.loadOSB();
-    mapInfo?.events?.backgrounds?.forEach((e) {
+    setState(() {
+      _mapInfo = mapInfo;
+    });
+    /*  mapInfo?.events?.backgrounds?.forEach((e) {
       printSprite(e);
     });
     mapInfo?.events?.fails?.forEach((e) {
@@ -37,7 +43,7 @@ class _MapPlayerPageState extends State<MapPlayerPage> {
     });
     mapInfo?.events?.foregrounds?.forEach((e) {
       printSprite(e);
-    });
+    });*/
     if (mapInfo != null) {
       _controller.mapInfo = mapInfo;
       MediaPlugin().play('${mapInfo.path}/${mapInfo.general.audioFilename}');
@@ -54,8 +60,21 @@ class _MapPlayerPageState extends State<MapPlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StoryBoardView(
-        controller: _controller,
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: <Widget>[
+          if (_mapInfo != null)
+            Container(
+              alignment: Alignment.center,
+              child: Image.file(
+                File(
+                    '${_mapInfo.path}/${_mapInfo.events.background?.fileName}'),
+              ),
+            ),
+          StoryBoardView(
+            controller: _controller,
+          ),
+        ],
       ),
     );
   }
