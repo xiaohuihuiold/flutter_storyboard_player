@@ -23,7 +23,7 @@ class StoryBoardController {
   int get time => _time;
 
   set time(int value) {
-    _time = time;
+    _time = value;
     _update(StoryBoardActionType.time);
   }
 
@@ -111,7 +111,7 @@ class _StoryBoardViewState extends State<StoryBoardView>
   @override
   void dispose() {
     super.dispose();
-    _fpsTimer.cancel();
+    _fpsTimer?.cancel();
   }
 
   @override

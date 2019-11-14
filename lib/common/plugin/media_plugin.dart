@@ -50,7 +50,7 @@ class MediaPlugin {
     }
   }
 
-  void _handler(MethodCall call) {
+  Future<dynamic> _handler(MethodCall call) async {
     /* switch (call.method) {
       case '':
         break;

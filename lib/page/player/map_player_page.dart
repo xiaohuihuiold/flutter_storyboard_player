@@ -19,7 +19,8 @@ class _MapPlayerPageState extends State<MapPlayerPage> {
   }
 
   Future<Null> _onFrame(_) async {
-    String path = r'assets\test.osu';
+    String path =
+        r'/sdcard/osu/372552 yuiko - Azuma no Sora kara Hajimaru Sekai/yuiko - Azuma no Sora kara Hajimaru Sekai (Short) (KaedekaShizuru) [Easy].osu';
     OSUMapLoader loader = OSUMapLoader();
     OSUMapInfo mapInfo = await loader.loadFromPath(path);
     mapInfo = await loader.loadOSB();
