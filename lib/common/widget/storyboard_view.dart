@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_storyboard_player/common/map/map_info.dart';
+import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
 
 const double OSB_WIDTH = 640.0;
 const double OSB_HEIGHT = 480.0;
@@ -145,6 +148,7 @@ typedef PaintCallback = void Function();
 /// 自定义storyboard画板
 class _StoryBoardPainter extends CustomPainter {
   Paint _girdPaint = Paint();
+  Paint _spritePaint = Paint();
 
   Canvas _canvas;
   Size _size;
@@ -174,9 +178,24 @@ class _StoryBoardPainter extends CustomPainter {
     _clearCanvas();
     _drawGird();
 
+    if (mapInfo?.events != null) {
+      _drawSprites(mapInfo.events.backgrounds);
+      _drawSprites(mapInfo.events.foregrounds);
+    }
+
     if (callback != null) {
       callback();
     }
+  }
+
+  void _drawSprites(List<Sprite> sprites) {
+    sprites.forEach((sprite) {
+      SpriteData spriteData = sprite.getData(time);
+      if (spriteData == null) {
+        return;
+      }
+      _drawImage(sprite, sprite.image, spriteData);
+    });
   }
 
   /// 清理画布
@@ -217,6 +236,31 @@ class _StoryBoardPainter extends CustomPainter {
       start.translate(_offsetX, 0).scale(_scale, _scale),
       end.translate(_offsetX, 0).scale(_scale, _scale),
       _girdPaint,
+    );
+  }
+
+  /// 适应画图片
+  void _drawImage(Sprite sprite, ui.Image image, SpriteData spriteData) {
+    double scaleX = spriteData.scaleX;
+    double scaleY = spriteData.scaleY;
+    double angle = spriteData.angle;
+    double opacity = spriteData.opacity;
+    Offset position = spriteData.position - spriteData.offset;
+
+    _spritePaint.color = Color.fromRGBO(255, 255, 255, opacity);
+    _canvas.translate(position.dx, position.dy);
+    _canvas.rotate(pi / 180.0 * angle);
+    _canvas.translate(-position.dx, -position.dy);
+    _canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      Rect.fromLTWH(
+        _offsetX + position.dx * _scale,
+        position.dy * _scale,
+        image.width * scaleX * _scale,
+        image.height * scaleY * _scale,
+      ),
+      _spritePaint,
     );
   }
 }

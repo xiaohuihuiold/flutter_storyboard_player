@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_storyboard_player/common/map/map_info.dart';
 import 'package:flutter_storyboard_player/common/map/storyboard_event.dart';
 import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
@@ -77,7 +77,7 @@ class OSUMapLoader {
     if (_events != null) {
       lines.insertAll(0, _events);
     }
-    _OSUStoryBoardLoader(mapInfo, lines).parse();
+    await (_OSUStoryBoardLoader(mapInfo, lines).parse());
     return mapInfo;
   }
 
@@ -154,7 +154,7 @@ class _OSUStoryBoardLoader {
   _OSUStoryBoardLoader(this.mapInfo, this.lines);
 
   /// 开始解析
-  void parse() {
+  Future<Null> parse() async {
     if (mapInfo == null || lines == null) {
       return;
     }
@@ -164,22 +164,22 @@ class _OSUStoryBoardLoader {
       String line = lines[i];
       switch (line.trim()) {
         case '//Background and Video events':
-          i = _parseBackground(i + 1);
+          i = await _parseBackground(i + 1);
           break;
         case '//Break Periods':
-          i = _parseBreakPeriods(i + 1);
+          i = await _parseBreakPeriods(i + 1);
           break;
         case '//Storyboard Layer 0 (Background)':
-          i = _parseLayer(i + 1, events.backgrounds);
+          i = await _parseLayer(i + 1, events.backgrounds);
           break;
         case '//Storyboard Layer 1 (Fail)':
-          i = _parseLayer(i + 1, events.fails);
+          i = await _parseLayer(i + 1, events.fails);
           break;
         case '//Storyboard Layer 2 (Pass)':
-          i = _parseLayer(i + 1, events.passes);
+          i = await _parseLayer(i + 1, events.passes);
           break;
         case '//Storyboard Layer 3 (Foreground)':
-          i = _parseLayer(i + 1, events.foregrounds);
+          i = await _parseLayer(i + 1, events.foregrounds);
           break;
         default:
           // 跳过不能处理的语句
@@ -190,7 +190,7 @@ class _OSUStoryBoardLoader {
   }
 
   /// 解析背景
-  int _parseBackground(int i) {
+  Future<int> _parseBackground(int i) async {
     OSBBackground osbBackground = OSBBackground();
     String line = lines[i];
     if (line.startsWith('//')) {
@@ -212,7 +212,7 @@ class _OSUStoryBoardLoader {
   }
 
   /// 解析休息点
-  int _parseBreakPeriods(int i) {
+  Future<int> _parseBreakPeriods(int i) async {
     for (; i < lines.length; i++) {
       String line = lines[i];
       if (line.startsWith('//')) {
@@ -223,13 +223,13 @@ class _OSUStoryBoardLoader {
   }
 
   /// 解析精灵图层
-  int _parseLayer(int i, List<Sprite> sprites) {
+  Future<int> _parseLayer(int i, List<Sprite> sprites) async {
     for (; i < lines.length;) {
       String line = lines[i];
       if (line.startsWith('//')) {
         return i;
       } else if (line.startsWith('Sprite') || line.startsWith('Animation')) {
-        i = _parseSprite(i, sprites);
+        i = await _parseSprite(i, sprites);
         continue;
       } else {
         i++;
@@ -240,7 +240,7 @@ class _OSUStoryBoardLoader {
   }
 
   /// 解析精灵图层
-  int _parseSprite(int i, List<Sprite> sprites) {
+  Future<int> _parseSprite(int i, List<Sprite> sprites) async {
     List<String> spriteStr = lines[i].split(',');
     if (spriteStr.length < 6) {
       return i + 1;
@@ -320,8 +320,9 @@ class _OSUStoryBoardLoader {
     sprite.origin = origin;
     sprite.fileName = fileName;
     sprite.position = position;
+    sprite.image = await _loadImage('${mapInfo.path}/${sprite.fileName}');
 
-    i = _parseEvents(i + 1, sprite: sprite);
+    i = await _parseEvents(i + 1, sprite: sprite);
 
     sprites.add(sprite);
     //
@@ -329,8 +330,8 @@ class _OSUStoryBoardLoader {
   }
 
   /// 解析事件
-  int _parseEvents(int i,
-      {Sprite sprite, LoopEvent loopEvent, TriggerEvent triggerEvent}) {
+  Future<int> _parseEvents(int i,
+      {Sprite sprite, LoopEvent loopEvent, TriggerEvent triggerEvent}) async {
     for (; i < lines.length;) {
       String line = lines[i];
       if ((loopEvent != null || triggerEvent != null) &&
@@ -348,7 +349,7 @@ class _OSUStoryBoardLoader {
         i++;
         continue;
       }
-      i = _parseEventType(
+      i = await _parseEventType(
         i + 1,
         eventStrs,
         sprite: sprite,
@@ -360,8 +361,8 @@ class _OSUStoryBoardLoader {
   }
 
   /// 根据类型解析事件
-  int _parseEventType(int i, List<String> event,
-      {Sprite sprite, LoopEvent loopEvent, TriggerEvent triggerEvent}) {
+  Future<int> _parseEventType(int i, List<String> event,
+      {Sprite sprite, LoopEvent loopEvent, TriggerEvent triggerEvent}) async {
     SpriteEvent spriteEvent;
     String type = event[0].replaceAll('_', '').replaceAll(' ', '');
     if (type != 'L' && type != 'T') {
@@ -491,7 +492,7 @@ class _OSUStoryBoardLoader {
         spriteEvent = loopEvent;
         loopEvent.startTime = int.tryParse(event[1]);
         loopEvent.loopCount = int.tryParse(event[2]);
-        i = _parseEvents(i, loopEvent: loopEvent);
+        i = await _parseEvents(i, loopEvent: loopEvent);
         break;
       case 'T':
         TriggerEvent triggerEvent = TriggerEvent();
@@ -509,7 +510,7 @@ class _OSUStoryBoardLoader {
           }
           return null;
         }();
-        i = _parseEvents(i, triggerEvent: triggerEvent);
+        i = await _parseEvents(i, triggerEvent: triggerEvent);
         break;
     }
     if (spriteEvent == null) {
@@ -537,5 +538,16 @@ class _OSUStoryBoardLoader {
       triggerEvent.events.add(spriteEvent);
     }
     return i;
+  }
+
+  Future<Image> _loadImage(String path) async {
+    File file = File(path);
+    if (!(await file.exists())) {
+      return null;
+    }
+    Codec codec = await instantiateImageCodec(
+        file.readAsBytesSync().buffer.asUint8List());
+    FrameInfo frameInfo = await codec.getNextFrame();
+    return frameInfo.image;
   }
 }
