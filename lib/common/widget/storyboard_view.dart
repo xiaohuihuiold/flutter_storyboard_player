@@ -250,13 +250,14 @@ class _StoryBoardPainter extends CustomPainter {
 
   /// 适应画图片
   void _drawImage(Sprite sprite, ui.Image image, SpriteData spriteData) {
-    if (spriteData.opacity <= 0.0) {
+    if (spriteData.opacity <= 0.0 ||
+        spriteData.scaleX <= 0.0 ||
+        spriteData.scaleY <= 0.0) {
       return;
     }
     double scaleX = spriteData.scaleX;
     double scaleY = spriteData.scaleY;
     double angle = spriteData.angle;
-    double opacity = spriteData.opacity;
     Offset position =
         spriteData.position.scale(_scale, _scale).translate(_offsetX, 0);
 
@@ -295,7 +296,7 @@ class _StoryBoardPainter extends CustomPainter {
       _spritePaint,
     );
     // 绘制边框
-    // _canvas.drawRect(rectPos, _borderPaint);
+    //_canvas.drawRect(rectPos, _borderPaint);
     _canvas.restore();
   }
 }

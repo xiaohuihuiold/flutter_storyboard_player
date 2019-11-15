@@ -26,7 +26,7 @@ class _MapPlayerPageState extends State<MapPlayerPage> {
 
   Future<Null> _onFrame(_) async {
     String path =
-        r"/sdcard/osu/29489 Ano Hana Cast - secret base _Kimi ga Kureta/Ano Hana Cast - secret base ~Kimi ga Kureta Mono~ (10 years after Ver.) (TV Size) (Colin Hou) [Easy].osu";
+        r"/sdcard/osu/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [-Harucela-'s Advanced].osu";
     OSUMapLoader loader = OSUMapLoader();
     OSUMapInfo mapInfo = await loader.loadFromPath(path);
     mapInfo = await loader.loadOSB();

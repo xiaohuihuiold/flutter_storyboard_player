@@ -335,10 +335,13 @@ class _OSUStoryBoardLoader {
       if ((sprite.events?.length ?? 0) < 1) {
         return null;
       }
-      int startTime = sprite.events[0].startTime;
+      int startTime;
       sprite.events?.forEach((event) {
         if (event.startTime == null || event.endTime == null) {
           return;
+        }
+        if (startTime == null) {
+          startTime = event.startTime;
         }
         if (event.startTime < startTime) {
           startTime = event.startTime;
@@ -351,10 +354,13 @@ class _OSUStoryBoardLoader {
       if ((sprite.events?.length ?? 0) < 1) {
         return null;
       }
-      int endTime = sprite.events[0].endTime;
+      int endTime;
       sprite.events?.forEach((event) {
         if (event.startTime == null || event.endTime == null) {
           return;
+        }
+        if (endTime == null) {
+          endTime = event.endTime;
         }
         if (event.endTime > endTime) {
           endTime = event.endTime;
