@@ -263,7 +263,7 @@ class _StoryBoardPainter extends CustomPainter {
       r, 0.0, 0.0, 0.0, 0.0, //
       0.0, g, 0.0, 0.0, 0.0, //
       0.0, 0.0, b, 0.0, 0.0, //
-      0.0, 0.0, 0.0, a, 0.0, //
+      0.0, 0.0, 0.0, 1.0, 0.0, //
     ]);
 
     _canvas.save();
@@ -289,7 +289,7 @@ class _StoryBoardPainter extends CustomPainter {
       _spritePaint,
     );
     // 绘制边框
-    _canvas.drawRect(rectPos, _borderPaint);
+    // _canvas.drawRect(rectPos, _borderPaint);
     _canvas.restore();
   }
 }

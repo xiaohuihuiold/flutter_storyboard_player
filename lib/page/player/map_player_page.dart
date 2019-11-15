@@ -25,7 +25,7 @@ class _MapPlayerPageState extends State<MapPlayerPage> {
 
   Future<Null> _onFrame(_) async {
     String path =
-        r"/sdcard/osu/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Rocket's Easy].osu";
+        r"/sdcard/osu/416153 Remo Prototype[CV_ Hanamori Yumiri] - Send/Remo Prototype[CV Hanamori Yumiri] - Sendan Life (Lami) [Nostalgia].osu";
     OSUMapLoader loader = OSUMapLoader();
     OSUMapInfo mapInfo = await loader.loadFromPath(path);
     mapInfo = await loader.loadOSB();

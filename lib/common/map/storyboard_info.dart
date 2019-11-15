@@ -178,9 +178,11 @@ class Sprite {
         } else if (event is MoveEvent) {
           spriteData.position = event.endOffset;
         } else if (event is MoveXEvent) {
-          spriteData.position = Offset(event.endX, position.dy);
+          spriteData.position =
+              Offset(event.endX, spriteData.position?.dy ?? position.dy);
         } else if (event is MoveYEvent) {
-          spriteData.position = Offset(position.dx, event.endY);
+          spriteData.position =
+              Offset(spriteData.position?.dx ?? position.dx, event.endY);
         } else if (event is ScaleEvent) {
           spriteData.scaleX = event.endScale;
           spriteData.scaleY = event.endScale;
@@ -208,9 +210,11 @@ class Sprite {
       } else if (event is MoveEvent) {
         spriteData.position = event.endOffset;
       } else if (event is MoveXEvent) {
-        spriteData.position = Offset(event.endX, position.dy);
+        spriteData.position =
+            Offset(event.endX, spriteData.position?.dy ?? position.dy);
       } else if (event is MoveYEvent) {
-        spriteData.position = Offset(position.dx, event.endY);
+        spriteData.position =
+            Offset(spriteData.position?.dx ?? position.dx, event.endY);
       } else if (event is ScaleEvent) {
         spriteData.scaleX = event.endScale;
         spriteData.scaleY = event.endScale;
@@ -244,12 +248,12 @@ class Sprite {
       // X移动
       double diff = event.endX - event.startX;
       double x = diff * progress + event.startX;
-      spriteData.position = Offset(x, position.dy);
+      spriteData.position = Offset(x, spriteData.position?.dy ?? position.dy);
     } else if (event is MoveYEvent) {
       // Y移动
       double diff = event.endY - event.startY;
       double y = diff * progress + event.startY;
-      spriteData.position = Offset(position.dx, y);
+      spriteData.position = Offset(spriteData.position?.dx ?? position.dx, y);
     } else if (event is ScaleEvent) {
       // 缩放
       double diff = event.endScale - event.startScale;

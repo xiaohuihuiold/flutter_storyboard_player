@@ -407,18 +407,14 @@ class _OSUStoryBoardLoader {
       case 'M':
         MoveEvent moveEvent = MoveEvent();
         spriteEvent = moveEvent;
-        Offset startOffset =
+        moveEvent.startOffset =
             Offset(double.tryParse(event[4]), double.tryParse(event[5]));
-        Offset endOffset;
         if (event.length == 6) {
-          endOffset = startOffset;
+          moveEvent.endOffset = moveEvent.startOffset;
         } else {
-          endOffset =
+          moveEvent.endOffset =
               Offset(double.tryParse(event[6]), double.tryParse(event[7]));
         }
-
-        moveEvent.startOffset = startOffset;
-        moveEvent.endOffset = endOffset;
         break;
       case 'MX':
         MoveXEvent moveXEvent = MoveXEvent();
