@@ -86,6 +86,7 @@ class SpriteData {
   double scaleY;
   Offset position;
   Offset offset;
+  Color color;
 
   bool isEmpty() {
     return scaleX == null ||
@@ -145,6 +146,10 @@ class Sprite {
     if (spriteData.angle == null) {
       spriteData.angle = 0;
     }
+    if (spriteData.color == null) {
+      spriteData.color = Color.fromRGBO(255, 255, 255, 1.0);
+    }
+    spriteData.color = spriteData.color.withOpacity(spriteData.opacity);
     spriteData.offset = _getOffset();
     _offset = spriteData.offset;
     if (spriteData.offset == null) {
@@ -184,6 +189,8 @@ class Sprite {
           spriteData.scaleY = event.endY;
         } else if (event is RotateEvent) {
           spriteData.angle = event.endRotate;
+        } else if (event is ColourEvent) {
+          spriteData.color = event.endColor;
         }
         return;
       } else {
@@ -212,6 +219,8 @@ class Sprite {
         spriteData.scaleY = event.endY;
       } else if (event is RotateEvent) {
         spriteData.angle = event.endRotate;
+      } else if (event is ColourEvent) {
+        spriteData.color = event.endColor;
       }
       return;
     }
@@ -229,9 +238,8 @@ class Sprite {
       spriteData.opacity = opacity;
     } else if (event is MoveEvent) {
       // 移动
-      Offset diff = event.endOffset - event.startOffset;
-      Offset position = diff * progress + event.startOffset;
-      spriteData.position = position;
+      spriteData.position =
+          Offset.lerp(event.startOffset, event.endOffset, progress);
     } else if (event is MoveXEvent) {
       // X移动
       double diff = event.endX - event.startX;
@@ -261,6 +269,9 @@ class Sprite {
       double diff = event.endRotate - event.startRotate;
       double angle = diff * progress + event.startRotate;
       spriteData.angle = angle;
+    } else if (event is ColourEvent) {
+      // 颜色
+      spriteData.color = Color.lerp(event.startColor, event.endColor, progress);
     }
   }
 

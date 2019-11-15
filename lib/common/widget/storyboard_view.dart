@@ -244,6 +244,9 @@ class _StoryBoardPainter extends CustomPainter {
 
   /// 适应画图片
   void _drawImage(Sprite sprite, ui.Image image, SpriteData spriteData) {
+    if (spriteData.opacity <= 0.0) {
+      return;
+    }
     double scaleX = spriteData.scaleX;
     double scaleY = spriteData.scaleY;
     double angle = spriteData.angle;
@@ -251,7 +254,18 @@ class _StoryBoardPainter extends CustomPainter {
     Offset position =
         spriteData.position.scale(_scale, _scale).translate(_offsetX, 0);
 
-    _spritePaint.color = Color.fromRGBO(255, 255, 255, opacity);
+    _spritePaint.color = spriteData.color;
+    double r = spriteData.color.red / 255.0;
+    double g = spriteData.color.green / 255.0;
+    double b = spriteData.color.blue / 255.0;
+    double a = spriteData.color.alpha / 255.0;
+    _spritePaint.colorFilter = ColorFilter.matrix([
+      r, 0.0, 0.0, 0.0, 0.0, //
+      0.0, g, 0.0, 0.0, 0.0, //
+      0.0, 0.0, b, 0.0, 0.0, //
+      0.0, 0.0, 0.0, a, 0.0, //
+    ]);
+
     _canvas.save();
     _canvas.translate(position.dx, position.dy);
     _canvas.rotate(angle);

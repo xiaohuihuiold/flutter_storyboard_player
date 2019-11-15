@@ -155,6 +155,7 @@ class _OSUStoryBoardLoader {
 
   /// 开始解析
   Future<Null> parse() async {
+    _imageCache.clear();
     if (mapInfo == null || lines == null) {
       return;
     }
@@ -475,8 +476,18 @@ class _OSUStoryBoardLoader {
       case 'C':
         ColourEvent colourEvent = ColourEvent();
         spriteEvent = colourEvent;
-        // TODO: 未实现
-        return i;
+        if (event.length == 7) {
+          Color startColor = _parseColor(event[4], event[5], event[6]);
+          colourEvent.startColor = startColor;
+          colourEvent.endColor = startColor;
+        } else if (event.length == 10) {
+          Color startColor = _parseColor(event[4], event[5], event[6]);
+          colourEvent.startColor = startColor;
+          Color endColor = _parseColor(event[7], event[8], event[9]);
+          colourEvent.endColor = endColor;
+        } else {
+          return i;
+        }
         break;
       case 'P':
         ParameterEvent parameterEvent = ParameterEvent();
@@ -546,6 +557,7 @@ class _OSUStoryBoardLoader {
     return i;
   }
 
+  /// 加载图片
   Map<String, Image> _imageCache = Map();
 
   Future<Image> _loadImage(String path) async {
@@ -563,5 +575,29 @@ class _OSUStoryBoardLoader {
     image = frameInfo.image;
     _imageCache[path.trim()] = image;
     return image;
+  }
+
+  /// 判断是否是十六进制颜色
+  bool _isHex(List<String> str) {
+    if (str == null) {
+      return null;
+    }
+    RegExp reg = RegExp(r'[a-zA-Z]');
+    String word = str?.firstWhere((el) => el.indexOf(reg) != -1, orElse: () {});
+    return word != null;
+  }
+
+  /// 解析颜色
+  Color _parseColor(String r, String g, String b) {
+    bool isHex = _isHex([r, g, b]);
+    if (isHex == true) {
+      return Color.fromRGBO(int.tryParse(r, radix: 16),
+          int.tryParse(g, radix: 16), int.tryParse(b, radix: 16), 1.0);
+    } else if (isHex == false) {
+      return Color.fromRGBO(int.tryParse(r, radix: 10),
+          int.tryParse(g, radix: 10), int.tryParse(b, radix: 10), 1.0);
+    } else {
+      return null;
+    }
   }
 }
