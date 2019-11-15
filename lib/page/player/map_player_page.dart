@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_storyboard_player/common/map/map_info.dart';
@@ -25,7 +26,7 @@ class _MapPlayerPageState extends State<MapPlayerPage> {
 
   Future<Null> _onFrame(_) async {
     String path =
-        r"/sdcard/osu/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Kocauxo's Insane].osu";
+        r"/sdcard/osu/416153 Remo Prototype[CV_ Hanamori Yumiri] - Send/Remo Prototype[CV Hanamori Yumiri] - Sendan Life (Lami) [Kanau's Hard].osu";
     OSUMapLoader loader = OSUMapLoader();
     OSUMapInfo mapInfo = await loader.loadFromPath(path);
     mapInfo = await loader.loadOSB();

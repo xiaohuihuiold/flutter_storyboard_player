@@ -8,6 +8,7 @@ import 'package:flutter_storyboard_player/common/map/map_info.dart';
 import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
 
 const double OSB_WIDTH = 640.0;
+const double OSB_WIDTH_LARGE = 800.0;
 const double OSB_HEIGHT = 480.0;
 
 enum StoryBoardActionType {
@@ -177,13 +178,18 @@ class _StoryBoardPainter extends CustomPainter {
     _size = size;
     _scale = _size.height / OSB_HEIGHT;
     _offsetX = (_size.width - OSB_WIDTH * _scale) / 2.0;
+    double offsetXLarge = (_size.width - OSB_WIDTH_LARGE * _scale) / 2.0;
 
     _clearCanvas();
     // _drawGird();
 
     if (mapInfo?.events != null) {
+      _canvas.save();
+      _canvas.clipRect(Rect.fromLTWH(
+          offsetXLarge, 0.0, OSB_WIDTH_LARGE * _scale, OSB_HEIGHT * _scale));
       _drawSprites(mapInfo.events.backgrounds);
       _drawSprites(mapInfo.events.foregrounds);
+      _canvas.restore();
     }
 
     if (callback != null) {
