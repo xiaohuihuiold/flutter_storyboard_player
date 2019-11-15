@@ -89,10 +89,12 @@ class SpriteData {
   Color color;
 
   bool isEmpty() {
-    return scaleX == null ||
-        scaleY == null ||
-        opacity == null ||
-        position == null;
+    return angle == null &&
+        opacity == null &&
+        scaleX == null &&
+        scaleY == null &&
+        position == null &&
+        color == null;
   }
 
   @override
@@ -205,26 +207,28 @@ class Sprite {
     }
     // 大于结束时间
     if (time > event.endTime) {
-      if (event is FadeEvent) {
-        spriteData.opacity = event.endOpacity;
-      } else if (event is MoveEvent) {
-        spriteData.position = event.endOffset;
-      } else if (event is MoveXEvent) {
-        spriteData.position =
-            Offset(event.endX, spriteData.position?.dy ?? position.dy);
-      } else if (event is MoveYEvent) {
-        spriteData.position =
-            Offset(spriteData.position?.dx ?? position.dx, event.endY);
-      } else if (event is ScaleEvent) {
-        spriteData.scaleX = event.endScale;
-        spriteData.scaleY = event.endScale;
-      } else if (event is VectorScaleEvent) {
-        spriteData.scaleX = event.endX;
-        spriteData.scaleY = event.endY;
-      } else if (event is RotateEvent) {
-        spriteData.angle = event.endRotate;
-      } else if (event is ColourEvent) {
-        spriteData.color = event.endColor;
+      if (!spriteData.isEmpty()) {
+        if (event is FadeEvent) {
+          spriteData.opacity = event.endOpacity;
+        } else if (event is MoveEvent) {
+          spriteData.position = event.endOffset;
+        } else if (event is MoveXEvent) {
+          spriteData.position =
+              Offset(event.endX, spriteData.position?.dy ?? position.dy);
+        } else if (event is MoveYEvent) {
+          spriteData.position =
+              Offset(spriteData.position?.dx ?? position.dx, event.endY);
+        } else if (event is ScaleEvent) {
+          spriteData.scaleX = event.endScale;
+          spriteData.scaleY = event.endScale;
+        } else if (event is VectorScaleEvent) {
+          spriteData.scaleX = event.endX;
+          spriteData.scaleY = event.endY;
+        } else if (event is RotateEvent) {
+          spriteData.angle = event.endRotate;
+        } else if (event is ColourEvent) {
+          spriteData.color = event.endColor;
+        }
       }
       return;
     }
