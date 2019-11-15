@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter_storyboard_player/common/map/map_info.dart';
@@ -22,7 +21,7 @@ class OSUMapLoader {
     this.path = path;
     File file = File(path);
     if (!(await file.exists())) {
-      print('没有找到文件: $path');
+      // TODO: 文件未找到
       return null;
     }
     // 读取数据按行
@@ -54,20 +53,22 @@ class OSUMapLoader {
 
   Future<OSUMapInfo> loadOSB() async {
     if (mapInfo == null) {
-      print('未加载地图文件');
+      // TODO: 地图未加载
       return null;
     }
     File file = File(path);
     if (!(await file.exists())) {
-      print('没有找到文件: $path');
+      // TODO: 文件未找到
       return null;
     }
     Directory directory = file.parent;
     FileSystemEntity entity = directory
         .listSync()
-        .firstWhere((e) => e.path.endsWith('.osb'), orElse: () {});
+        .firstWhere((e) => e.path.endsWith('.osb'), orElse: () {
+      return null;
+    });
     if (entity == null) {
-      print('没有找到osb文件');
+      // TODO: .osb文件未找到
       return mapInfo;
     }
     String osbPath = entity.path;

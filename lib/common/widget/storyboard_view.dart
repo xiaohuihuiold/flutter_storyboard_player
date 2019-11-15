@@ -296,7 +296,7 @@ class _StoryBoardPainter extends CustomPainter {
       _spritePaint,
     );
     // 绘制边框
-    //_canvas.drawRect(rectPos, _borderPaint);
+    _canvas.drawRect(rectPos, _borderPaint);
     _canvas.restore();
   }
 }
