@@ -105,6 +105,12 @@ class SpriteData {
 
 /// 精灵
 class Sprite {
+  /// 开始时间
+  int startTime;
+
+  /// 结束时间
+  int endTime;
+
   /// 图层
   SpriteLayer layer;
 
@@ -207,7 +213,7 @@ class Sprite {
     }
     // 大于结束时间
     if (time > event.endTime) {
-      if (!spriteData.isEmpty()) {
+      if (time >= startTime && time <= endTime) {
         if (event is FadeEvent) {
           spriteData.opacity = event.endOpacity;
         } else if (event is MoveEvent) {

@@ -331,6 +331,38 @@ class _OSUStoryBoardLoader {
 
     i = await _parseEvents(i + 1, sprite: sprite);
 
+    sprite.startTime = () {
+      if ((sprite.events?.length ?? 0) < 1) {
+        return null;
+      }
+      int startTime = sprite.events[0].startTime;
+      sprite.events?.forEach((event) {
+        if (event.startTime == null || event.endTime == null) {
+          return;
+        }
+        if (event.startTime < startTime) {
+          startTime = event.startTime;
+        }
+      });
+      return startTime;
+    }();
+
+    sprite.endTime = () {
+      if ((sprite.events?.length ?? 0) < 1) {
+        return null;
+      }
+      int endTime = sprite.events[0].endTime;
+      sprite.events?.forEach((event) {
+        if (event.startTime == null || event.endTime == null) {
+          return;
+        }
+        if (event.endTime > endTime) {
+          endTime = event.endTime;
+        }
+      });
+      return endTime;
+    }();
+
     sprites.add(sprite);
     //
     return i;
