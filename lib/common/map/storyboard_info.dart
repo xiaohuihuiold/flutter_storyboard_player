@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter_storyboard_player/common/map/storyboard_event.dart';
 
+import 'storyboard_event.dart';
+
 /// 故事板事件
 class OSBEvents {
   /// 背景
@@ -88,6 +90,7 @@ class SpriteData {
   Offset position;
   Offset offset;
   Color color;
+  ParameterType parameterType;
 
   bool isEmpty() {
     return angle == null &&
@@ -187,10 +190,7 @@ class Sprite {
 
   /// 计算事件
   void _calEvent(int time, SpriteData spriteData, SpriteEvent event) {
-    if (event == null ||
-        event is ParameterEvent ||
-        event is LoopEvent ||
-        event is TriggerEvent) {
+    if (event == null || event is LoopEvent || event is TriggerEvent) {
       return;
     }
     // 小于开始时间
@@ -218,6 +218,8 @@ class Sprite {
         spriteData.angle = event.endRotate;
       } else if (event is ColourEvent) {
         spriteData.color = event.endColor;
+      } else if (event is ParameterEvent) {
+        spriteData.parameterType = event.type;
       }
       return;
     }
@@ -242,6 +244,8 @@ class Sprite {
         spriteData.angle = event.endRotate;
       } else if (event is ColourEvent) {
         spriteData.color = event.endColor;
+      } else if (event is ParameterEvent) {
+        spriteData.parameterType = event.type;
       }
       return;
     }
@@ -292,6 +296,8 @@ class Sprite {
     } else if (event is ColourEvent) {
       // 颜色
       spriteData.color = Color.lerp(event.startColor, event.endColor, progress);
+    } else if (event is ParameterEvent) {
+      spriteData.parameterType = event.type;
     }
   }
 

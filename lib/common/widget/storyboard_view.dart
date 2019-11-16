@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_storyboard_player/common/map/map_info.dart';
 import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
 
+import '../map/storyboard_event.dart';
+
 const double OSB_WIDTH = 640.0;
 const double OSB_WIDTH_LARGE = 800.0;
 const double OSB_HEIGHT = 480.0;
@@ -289,6 +291,19 @@ class _StoryBoardPainter extends CustomPainter {
       image.height * scaleY * _scale,
     );
 
+    _spritePaint.blendMode = BlendMode.srcOver;
+    switch (spriteData.parameterType) {
+      case ParameterType.H:
+        //rectPos = Rect.fromLTRB(rectPos.right, rectPos.top, rectPos.left, rectPos.bottom);
+        break;
+      case ParameterType.V:
+        //rectPos = Rect.fromLTRB(rectPos.top, rectPos.bottom, rectPos.right, rectPos.top);
+        break;
+      case ParameterType.A:
+        _spritePaint.blendMode = BlendMode.plus;
+        break;
+    }
+
     _canvas.drawImageRect(
       image,
       Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
@@ -296,7 +311,7 @@ class _StoryBoardPainter extends CustomPainter {
       _spritePaint,
     );
     // 绘制边框
-    _canvas.drawRect(rectPos, _borderPaint);
+    // _canvas.drawRect(rectPos, _borderPaint);
     _canvas.restore();
   }
 }
