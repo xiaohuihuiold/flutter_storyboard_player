@@ -5,6 +5,8 @@ import 'package:flutter_storyboard_player/common/map/map_info.dart';
 import 'package:flutter_storyboard_player/common/map/storyboard_event.dart';
 import 'package:flutter_storyboard_player/common/map/storyboard_info.dart';
 
+import 'storyboard_info.dart';
+
 /// osu地图加载器
 class OSUMapLoader {
   /// 地图路径
@@ -328,8 +330,19 @@ class _OSUStoryBoardLoader {
     sprite.origin = origin;
     sprite.fileName = fileName.replaceAll(r'\', '/');
     sprite.position = position;
-    sprite.image = await _loadImage('${mapInfo.path}/${sprite.fileName}');
-
+    if (sprite is AnimationSprite) {
+      sprite.images = List();
+      String fileName =
+          sprite.fileName.substring(0, sprite.fileName.lastIndexOf('.'));
+      String fileFormat = sprite.fileName.substring(
+          sprite.fileName.lastIndexOf('.') + 1, sprite.fileName.length);
+      for (int i = 0; i < sprite.frameCount; i++) {
+        sprite.images
+            .add(await _loadImage('${mapInfo.path}/$fileName$i.$fileFormat'));
+      }
+    } else {
+      sprite.image = await _loadImage('${mapInfo.path}/${sprite.fileName}');
+    }
     i = await _parseEvents(i + 1, sprite: sprite);
 
     sprite.startTime = () {
@@ -545,6 +558,21 @@ class _OSUStoryBoardLoader {
         loopEvent.startTime = int.tryParse(event[1]);
         loopEvent.loopCount = int.tryParse(event[2]);
         i = await _parseEvents(i, loopEvent: loopEvent);
+        int maxTime;
+        loopEvent.events?.forEach((event) {
+          if (event.endTime == null) {
+            return;
+          }
+          if (maxTime == null) {
+            maxTime = event.endTime;
+            return;
+          }
+          if (event.endTime > maxTime) {
+            maxTime = event.endTime;
+            return;
+          }
+        });
+        loopEvent.endTime = maxTime;
         break;
       case 'T':
         TriggerEvent triggerEvent = TriggerEvent();

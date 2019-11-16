@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter_storyboard_player/common/map/storyboard_event.dart';
 
 import 'storyboard_event.dart';
+import 'storyboard_event.dart';
 
 /// 故事板事件
 class OSBEvents {
@@ -137,8 +138,12 @@ class Sprite {
   /// 偏移
   Offset _offset;
 
+  Image getImage(int time) {
+    return image;
+  }
+
   SpriteData getSpriteData(int time) {
-    if (image == null || events == null) {
+    if (events == null) {
       return null;
     }
     if (time < startTime || time > endTime) {
@@ -176,7 +181,7 @@ class Sprite {
       spriteData.color = Color.fromRGBO(255, 255, 255, 1.0);
     }
     spriteData.color = spriteData.color.withOpacity(spriteData.opacity);
-    spriteData.offset = _getOffset();
+    spriteData.offset = _getOffset(time);
     _offset = spriteData.offset;
     if (spriteData.offset == null) {
       return null;
@@ -190,11 +195,15 @@ class Sprite {
 
   /// 计算事件
   void _calEvent(int time, SpriteData spriteData, SpriteEvent event) {
-    if (event == null || event is LoopEvent || event is TriggerEvent) {
+    if (event == null || event is TriggerEvent) {
       return;
     }
     // 小于开始时间
     if (time < event.startTime) {
+      return;
+    }
+    if (event is LoopEvent) {
+      event.updateSpriteData(time, this, spriteData);
       return;
     }
     // 开始时间等于结束时间
@@ -302,7 +311,8 @@ class Sprite {
   }
 
   /// 获取偏移值
-  Offset _getOffset() {
+  Offset _getOffset(int time) {
+    Image image = getImage(time);
     if (_offset != null) {
       return _offset;
     }
@@ -345,6 +355,25 @@ class AnimationSprite extends Sprite {
 
   /// 动画循环方式
   SpriteLoopType loopType;
+
+  /// 图片
+  List<Image> images;
+
+  @override
+  Image getImage(int time) {
+    if ((images?.length ?? 0) == 0) {
+      return null;
+    }
+    int diffTIme = time - startTime;
+    int index = diffTIme ~/ frameDelay;
+    if (loopType == SpriteLoopType.LoopForever) {
+      index = (index + 1) % frameCount;
+    }
+    if (index < images.length) {
+      return images[index];
+    }
+    return images[images.length - 1];
+  }
 
   @override
   String toString() {

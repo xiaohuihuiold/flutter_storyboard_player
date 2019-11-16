@@ -205,7 +205,7 @@ class _StoryBoardPainter extends CustomPainter {
       if (spriteData == null) {
         return;
       }
-      _drawImage(sprite, sprite.image, spriteData);
+      _drawImage(sprite, sprite.getImage(time), spriteData);
     });
   }
 
