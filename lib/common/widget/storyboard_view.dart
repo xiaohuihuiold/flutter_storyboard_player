@@ -200,7 +200,7 @@ class _StoryBoardPainter extends CustomPainter {
   }
 
   void _drawSprites(List<Sprite> sprites) {
-    int ti = 180000;
+    int ti = time;
     sprites.forEach((sprite) {
       SpriteData spriteData = sprite.getSpriteData(ti);
       if (spriteData == null) {

@@ -157,7 +157,7 @@ class Sprite {
     SpriteData spriteData = SpriteData();
     for (int i = events.length - 1; i >= 0; i--) {
       SpriteEvent event = events[i];
-      _calEvent(time, spriteData, event);
+      calEvent(time, spriteData, event);
     }
     if (spriteData.isEmpty()) {
       return null;
@@ -224,7 +224,7 @@ class Sprite {
   }
 
   /// 计算事件
-  void _calEvent(int time, SpriteData spriteData, SpriteEvent event) {
+  void calEvent(int time, SpriteData spriteData, SpriteEvent event) {
     if (event == null || event is TriggerEvent) {
       return;
     }

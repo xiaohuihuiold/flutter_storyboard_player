@@ -377,7 +377,7 @@ class _OSUStoryBoardLoader {
           endTime = event.endTime;
         }
         if (event is LoopEvent) {
-          if (event.endTime + event.startTime > endTime) {
+          if (event.endTime * event.loopCount + event.startTime > endTime) {
             endTime = event.endTime;
           }
           return;
