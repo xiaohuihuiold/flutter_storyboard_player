@@ -172,7 +172,7 @@ class LoopEvent extends SpriteEvent {
       return;
     }
     int times = diffTime % time;
-    for (int i = events.length - 1; i >= 0; i--) {
+    for (int i = 0; i < events.length; i++) {
       SpriteEvent event = events[i];
       sprite.calEvent(times, spriteData, event);
     }

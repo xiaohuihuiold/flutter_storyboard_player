@@ -95,6 +95,16 @@ class SpriteData {
   Color color;
   ParameterType parameterType;
 
+  int fadeEndTime;
+  int moveEndTime;
+  int moveXEndTime;
+  int moveYEndTime;
+  int scaleEndTime;
+  int vectorEndTime;
+  int rotateEndTime;
+  int colourEndTime;
+  int paramEndTime;
+
   bool isEmpty() {
     return angle == null &&
         opacity == null &&
@@ -155,7 +165,7 @@ class Sprite {
       return null;
     }
     SpriteData spriteData = SpriteData();
-    for (int i = events.length - 1; i >= 0; i--) {
+    for (int i = 0; i < events.length; i++) {
       SpriteEvent event = events[i];
       calEvent(time, spriteData, event);
     }
@@ -168,19 +178,12 @@ class Sprite {
       }
       spriteData.opacity = 1.0;
     }
-    if (spriteData.scale != null) {
-      if (spriteData.scaleX != null) {
-        spriteData.scaleX += spriteData.scale;
-      }
-      if (spriteData.scaleY != null) {
-        spriteData.scaleY += spriteData.scale;
-      }
-    }
+
     if (spriteData.scaleX == null) {
-      spriteData.scaleX = spriteData.scale ?? 0.2;
+      spriteData.scaleX = spriteData.scale ?? 1.0;
     }
     if (spriteData.scaleY == null) {
-      spriteData.scaleY = spriteData.scale ?? 0.2;
+      spriteData.scaleY = spriteData.scale ?? 1.0;
     }
     if (spriteData.position != null) {
       double x = spriteData.position.dx;
@@ -263,24 +266,106 @@ class Sprite {
     // 大于结束时间
     if (time > event.endTime) {
       if (event is FadeEvent) {
-        spriteData.opacity = spriteData.opacity ?? event.endOpacity;
+        if (spriteData.fadeEndTime == null) {
+          spriteData.fadeEndTime = event.endTime;
+          spriteData.opacity = event.endOpacity;
+          return;
+        }
+        if (spriteData.fadeEndTime < event.endTime) {
+          spriteData.fadeEndTime = event.endTime;
+          spriteData.opacity = event.endOpacity;
+          return;
+        }
       } else if (event is MoveEvent) {
-        spriteData.position = spriteData.position ?? event.endOffset;
+        if (spriteData.moveEndTime == null) {
+          spriteData.moveEndTime = event.endTime;
+          spriteData.position = event.endOffset;
+          return;
+        }
+        if (spriteData.moveEndTime < event.endTime) {
+          spriteData.moveEndTime = event.endTime;
+          spriteData.position = event.endOffset;
+          return;
+        }
       } else if (event is MoveXEvent) {
-        spriteData.x = spriteData.x ?? event.endX;
+        if (spriteData.moveXEndTime == null) {
+          spriteData.moveXEndTime = event.endTime;
+          spriteData.x = event.endX;
+          return;
+        }
+        if (spriteData.moveXEndTime < event.endTime) {
+          spriteData.moveXEndTime = event.endTime;
+          spriteData.x = event.endX;
+          return;
+        }
       } else if (event is MoveYEvent) {
-        spriteData.y = spriteData.y ?? event.endY;
+        if (spriteData.moveYEndTime == null) {
+          spriteData.moveYEndTime = event.endTime;
+          spriteData.y = event.endY;
+          return;
+        }
+        if (spriteData.moveYEndTime < event.endTime) {
+          spriteData.moveYEndTime = event.endTime;
+          spriteData.y = event.endY;
+          return;
+        }
       } else if (event is ScaleEvent) {
-        spriteData.scale = spriteData.scale ?? event.endScale;
+        if (spriteData.scaleEndTime == null) {
+          spriteData.scaleEndTime = event.endTime;
+          spriteData.scale = event.endScale;
+          return;
+        }
+        if (spriteData.scaleEndTime < event.endTime) {
+          spriteData.scaleEndTime = event.endTime;
+          spriteData.scale = event.endScale;
+          return;
+        }
       } else if (event is VectorScaleEvent) {
-        spriteData.scaleX = spriteData.scaleX ?? event.endX;
-        spriteData.scaleY = spriteData.scaleY ?? event.endY;
+        if (spriteData.vectorEndTime == null) {
+          spriteData.vectorEndTime = event.endTime;
+          spriteData.scaleX = event.endX;
+          spriteData.scaleY = event.endY;
+          return;
+        }
+        if (spriteData.vectorEndTime < event.endTime) {
+          spriteData.vectorEndTime = event.endTime;
+          spriteData.scaleX = event.endX;
+          spriteData.scaleY = event.endY;
+          return;
+        }
       } else if (event is RotateEvent) {
-        spriteData.angle = event.endRotate;
+        if (spriteData.rotateEndTime == null) {
+          spriteData.rotateEndTime = event.endTime;
+          spriteData.angle = event.endRotate;
+          return;
+        }
+        if (spriteData.rotateEndTime < event.endTime) {
+          spriteData.rotateEndTime = event.endTime;
+          spriteData.angle = event.endRotate;
+          return;
+        }
       } else if (event is ColourEvent) {
-        spriteData.color = event.endColor;
+        if (spriteData.colourEndTime == null) {
+          spriteData.colourEndTime = event.endTime;
+          spriteData.color = event.endColor;
+          return;
+        }
+        if (spriteData.colourEndTime < event.endTime) {
+          spriteData.colourEndTime = event.endTime;
+          spriteData.color = event.endColor;
+          return;
+        }
       } else if (event is ParameterEvent) {
-        spriteData.parameterType = event.type;
+        if (spriteData.paramEndTime == null) {
+          spriteData.paramEndTime = event.endTime;
+          spriteData.parameterType = event.type;
+          return;
+        }
+        if (spriteData.paramEndTime < event.endTime) {
+          spriteData.paramEndTime = event.endTime;
+          spriteData.parameterType = event.type;
+          return;
+        }
       }
       return;
     }
