@@ -89,6 +89,8 @@ class SpriteData {
   double scaleX;
   double scaleY;
   Offset position;
+  double x;
+  double y;
   Offset offset;
   Color color;
   ParameterType parameterType;
@@ -138,6 +140,9 @@ class Sprite {
   /// 偏移
   Offset _offset;
 
+  /// 是否有透明度变化
+  bool hasFade = false;
+
   Image getImage(int time) {
     return image;
   }
@@ -150,12 +155,18 @@ class Sprite {
       return null;
     }
     SpriteData spriteData = SpriteData();
-    for (int i = 0; i < events.length; i++) {
+    for (int i = events.length - 1; i >= 0; i--) {
       SpriteEvent event = events[i];
       _calEvent(time, spriteData, event);
     }
-    if (spriteData.opacity == null) {
+    if (spriteData.isEmpty()) {
       return null;
+    }
+    if (spriteData.opacity == null) {
+      if (hasFade) {
+        return null;
+      }
+      spriteData.opacity = 1.0;
     }
     if (spriteData.scale != null) {
       if (spriteData.scaleX != null) {
@@ -166,13 +177,32 @@ class Sprite {
       }
     }
     if (spriteData.scaleX == null) {
-      spriteData.scaleX = spriteData.scale ?? 1.0;
+      spriteData.scaleX = spriteData.scale ?? 0.2;
     }
     if (spriteData.scaleY == null) {
-      spriteData.scaleY = spriteData.scale ?? 1.0;
+      spriteData.scaleY = spriteData.scale ?? 0.2;
+    }
+    if (spriteData.position != null) {
+      double x = spriteData.position.dx;
+      double y = spriteData.position.dy;
+      if (spriteData.x != null) {
+        x = spriteData.x;
+      }
+      if (spriteData.y != null) {
+        y = spriteData.y;
+      }
+      spriteData.position = Offset(x, y);
     }
     if (spriteData.position == null) {
-      spriteData.position = position;
+      double x = spriteData.position?.dx;
+      double y = spriteData.position?.dy;
+      if (spriteData.x != null) {
+        x = x ?? spriteData.x;
+      }
+      if (spriteData.y != null) {
+        y = y ?? spriteData.y;
+      }
+      spriteData.position = Offset(x ?? position.dx, y ?? position.dy);
     }
     if (spriteData.angle == null) {
       spriteData.angle = 0;
@@ -213,11 +243,9 @@ class Sprite {
       } else if (event is MoveEvent) {
         spriteData.position = event.endOffset;
       } else if (event is MoveXEvent) {
-        spriteData.position =
-            Offset(event.endX, spriteData.position?.dy ?? position.dy);
+        spriteData.x = event.endX;
       } else if (event is MoveYEvent) {
-        spriteData.position =
-            Offset(spriteData.position?.dx ?? position.dx, event.endY);
+        spriteData.y = event.endY;
       } else if (event is ScaleEvent) {
         spriteData.scale = event.endScale;
       } else if (event is VectorScaleEvent) {
@@ -235,20 +263,18 @@ class Sprite {
     // 大于结束时间
     if (time > event.endTime) {
       if (event is FadeEvent) {
-        spriteData.opacity = event.endOpacity;
+        spriteData.opacity = spriteData.opacity ?? event.endOpacity;
       } else if (event is MoveEvent) {
-        spriteData.position = event.endOffset;
+        spriteData.position = spriteData.position ?? event.endOffset;
       } else if (event is MoveXEvent) {
-        spriteData.position =
-            Offset(event.endX, spriteData.position?.dy ?? position.dy);
+        spriteData.x = spriteData.x ?? event.endX;
       } else if (event is MoveYEvent) {
-        spriteData.position =
-            Offset(spriteData.position?.dx ?? position.dx, event.endY);
+        spriteData.y = spriteData.y ?? event.endY;
       } else if (event is ScaleEvent) {
-        spriteData.scale = event.endScale;
+        spriteData.scale = spriteData.scale ?? event.endScale;
       } else if (event is VectorScaleEvent) {
-        spriteData.scaleX = event.endX;
-        spriteData.scaleY = event.endY;
+        spriteData.scaleX = spriteData.scaleX ?? event.endX;
+        spriteData.scaleY = spriteData.scaleY ?? event.endY;
       } else if (event is RotateEvent) {
         spriteData.angle = event.endRotate;
       } else if (event is ColourEvent) {
@@ -278,12 +304,12 @@ class Sprite {
       // X移动
       double diff = event.endX - event.startX;
       double x = diff * progress + event.startX;
-      spriteData.position = Offset(x, spriteData.position?.dy ?? position.dy);
+      spriteData.x = x;
     } else if (event is MoveYEvent) {
       // Y移动
       double diff = event.endY - event.startY;
       double y = diff * progress + event.startY;
-      spriteData.position = Offset(spriteData.position?.dx ?? position.dx, y);
+      spriteData.y = y;
     } else if (event is ScaleEvent) {
       // 缩放
       double diff = event.endScale - event.startScale;

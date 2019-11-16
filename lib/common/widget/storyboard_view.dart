@@ -153,7 +153,7 @@ class _StoryBoardPainter extends CustomPainter {
   Paint _girdPaint = Paint();
   Paint _spritePaint = Paint();
   Paint _borderPaint = Paint()
-    ..color = Colors.redAccent.withOpacity(0.7)
+    ..color = Colors.redAccent
     ..style = PaintingStyle.stroke;
 
   Canvas _canvas;
@@ -200,12 +200,13 @@ class _StoryBoardPainter extends CustomPainter {
   }
 
   void _drawSprites(List<Sprite> sprites) {
+    int ti = 180000;
     sprites.forEach((sprite) {
-      SpriteData spriteData = sprite.getSpriteData(time);
+      SpriteData spriteData = sprite.getSpriteData(ti);
       if (spriteData == null) {
         return;
       }
-      _drawImage(sprite, sprite.getImage(time), spriteData);
+      _drawImage(sprite, sprite.getImage(ti), spriteData);
     });
   }
 

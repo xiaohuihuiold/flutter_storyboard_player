@@ -376,6 +376,12 @@ class _OSUStoryBoardLoader {
         if (endTime == null) {
           endTime = event.endTime;
         }
+        if (event is LoopEvent) {
+          if (event.endTime + event.startTime > endTime) {
+            endTime = event.endTime;
+          }
+          return;
+        }
         if (event.endTime > endTime) {
           endTime = event.endTime;
         }
@@ -455,6 +461,8 @@ class _OSUStoryBoardLoader {
         } else {
           fadeEvent.endOpacity = double.tryParse(event[5].trim());
         }
+        sprite?.hasFade = true;
+        loopEvent?.hasFade = true;
         break;
       case 'M':
         MoveEvent moveEvent = MoveEvent();
@@ -573,6 +581,7 @@ class _OSUStoryBoardLoader {
           }
         });
         loopEvent.endTime = maxTime;
+        sprite?.hasFade = loopEvent.hasFade || (sprite?.hasFade ?? false);
         break;
       case 'T':
         TriggerEvent triggerEvent = TriggerEvent();
