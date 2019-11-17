@@ -313,6 +313,16 @@ class _StoryBoardPainter extends CustomPainter {
     );
     // 绘制边框
     // _canvas.drawRect(rectPos, _borderPaint);
+    /// TODO: DEBUG
+    if (sprite.startTime == 123895 &&
+        sprite.endTime == 125780 &&
+        sprite.events.length == 6) {
+      /*print('////////');
+      sprite.events.forEach((e) {
+        print('${e.startTime} ${e.endTime} $e');
+      });*/
+      _canvas.drawRect(rectPos, _borderPaint);
+    }
     _canvas.restore();
   }
 }

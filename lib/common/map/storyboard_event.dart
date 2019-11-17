@@ -159,9 +159,6 @@ class LoopEvent extends SpriteEvent {
   /// 循环的事件
   List<SpriteEvent> events;
 
-  /// 是否有透明度
-  bool hasFade = false;
-
   void updateSpriteData(int time, Sprite sprite, SpriteData spriteData) {
     if (time < startTime) {
       return;

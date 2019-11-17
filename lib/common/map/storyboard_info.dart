@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter_storyboard_player/common/map/storyboard_event.dart';
@@ -150,9 +151,6 @@ class Sprite {
   /// 偏移
   Offset _offset;
 
-  /// 是否有透明度变化
-  bool hasFade = false;
-
   Image getImage(int time) {
     return image;
   }
@@ -173,17 +171,22 @@ class Sprite {
       return null;
     }
     if (spriteData.opacity == null) {
-      if (hasFade) {
+      if (_hasBefore(time, FadeEvent, events)) {
         return null;
       }
       spriteData.opacity = 1.0;
     }
-
     if (spriteData.scaleX == null) {
-      spriteData.scaleX = spriteData.scale ?? 1.0;
-    }
-    if (spriteData.scaleY == null) {
-      spriteData.scaleY = spriteData.scale ?? 1.0;
+      if (spriteData.scale != null) {
+        spriteData.scaleX = spriteData.scale;
+        spriteData.scaleY = spriteData.scale;
+      } else if (_hasBefore(time, ScaleEvent, events) ||
+          _hasBefore(time, VectorScaleEvent, events)) {
+        return null;
+      } else {
+        spriteData.scaleX = 1.0;
+        spriteData.scaleY = 1.0;
+      }
     }
     if (spriteData.position != null) {
       double x = spriteData.position.dx;
@@ -419,6 +422,16 @@ class Sprite {
     } else if (event is ParameterEvent) {
       spriteData.parameterType = event.type;
     }
+  }
+
+  bool _hasBefore(int time, Type type, List<SpriteEvent> events) {
+    SpriteEvent event = events?.firstWhere((e) {
+      if (e is LoopEvent) {
+        return _hasBefore(time, type, e.events);
+      }
+      return e.runtimeType == type;
+    }, orElse: () {});
+    return event != null;
   }
 
   /// 获取偏移值

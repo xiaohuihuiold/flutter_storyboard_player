@@ -461,8 +461,6 @@ class _OSUStoryBoardLoader {
         } else {
           fadeEvent.endOpacity = double.tryParse(event[5].trim());
         }
-        sprite?.hasFade = true;
-        loopEvent?.hasFade = true;
         break;
       case 'M':
         MoveEvent moveEvent = MoveEvent();
@@ -505,6 +503,7 @@ class _OSUStoryBoardLoader {
         } else {
           scaleEvent.endScale = double.tryParse(event[5].trim());
         }
+
         break;
       case 'V':
         VectorScaleEvent vectorScaleEvent = VectorScaleEvent();
@@ -581,7 +580,6 @@ class _OSUStoryBoardLoader {
           }
         });
         loopEvent.endTime = maxTime;
-        sprite?.hasFade = loopEvent.hasFade || (sprite?.hasFade ?? false);
         break;
       case 'T':
         TriggerEvent triggerEvent = TriggerEvent();
